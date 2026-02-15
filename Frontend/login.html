@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Agri Login</title>
+
     <style>
         body {
             margin: 0;
@@ -28,11 +29,6 @@
             margin-bottom: 20px;
         }
 
-        label {
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
         input {
             width: 100%;
             padding: 10px;
@@ -40,6 +36,12 @@
             margin-bottom: 15px;
             border-radius: 6px;
             border: 1px solid #ccc;
+            outline: none;
+        }
+
+        input:focus {
+            border: 1px solid #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
         }
 
         button {
@@ -51,29 +53,49 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: bold;
         }
 
         button:hover {
             background: #1b5e20;
         }
 
-        .popup {
-            margin-top: 15px;
+        .signup-link {
+            margin-top: 14px;
             text-align: center;
-            background: #e8f5e9;
-            padding: 10px;
-            border-radius: 6px;
             font-size: 14px;
         }
 
-        .popup a {
+        .signup-link a {
             color: #1b5e20;
             font-weight: bold;
             text-decoration: none;
         }
 
-        .popup a:hover {
+        .signup-link a:hover {
             text-decoration: underline;
+        }
+
+        /* MESSAGE BOX */
+        .message-box {
+            margin-top: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .message-success {
+            background: #e8f5e9;
+            color: #1b5e20;
+            border: 1px solid #a5d6a7;
+        }
+
+        .message-error {
+            background: #ffebee;
+            color: #b71c1c;
+            border: 1px solid #ef9a9a;
         }
     </style>
 </head>
@@ -84,65 +106,113 @@
     <h2>🌱 Agri Login</h2>
 
     <form id="loginForm">
-
         <input type="text" id="username" placeholder="Username" required>
         <input type="password" id="password" placeholder="Password" required>
 
-        <button type="submit">Login</button>
+        <button type="submit" id="loginBtn">Login</button>
+
+        <!-- MESSAGE AREA -->
+        <div id="messageBox" class="message-box"></div>
     </form>
 
     <div class="signup-link">
         <p>Don't have an account? <a href="signup.html">Sign up</a></p>
     </div>
+</div>
 
-    <script>
-        const form = document.getElementById("loginForm");
-        const usernameInput = document.getElementById("username");
-        const passwordInput = document.getElementById("password");
+<script>
+    const form = document.getElementById("loginForm");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
 
-       form.addEventListener("submit", async function(e) {
-    e.preventDefault();
+    const messageBox = document.getElementById("messageBox");
+    const loginBtn = document.getElementById("loginBtn");
 
-    const payload = {
-        username: usernameInput.value,
-        password: passwordInput.value
-    };
+    function showMessage(message, type) {
+        messageBox.style.display = "block";
+        messageBox.classList.remove("message-success", "message-error");
 
-    try {
-        const response = await fetch("http://localhost:8083/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            // Parse the JSON returned from backend
-            const data = await response.json();
-
-
-            localStorage.setItem("loggedInUser", data.username);
-            localStorage.setItem("userRole", data.role);
-            localStorage.setItem("userId",data.userId);
-
-            alert("Login successful");
-
-            // Redirect to landing page
-            window.location.href = "landing.html";
+        if (type === "success") {
+            messageBox.classList.add("message-success");
         } else {
-            // Handle errors like 401
-            const errorData = await response.json();
-            alert(errorData.message || "Invalid credentials");
+            messageBox.classList.add("message-error");
         }
-    } catch (err) {
-        console.error("Login failed:", err);
-        alert("Something went wrong. Please try again.");
+
+        messageBox.textContent = message;
     }
-});
 
-    </script>
+    function clearMessage() {
+        messageBox.style.display = "none";
+        messageBox.textContent = "";
+        messageBox.classList.remove("message-success", "message-error");
+    }
 
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        clearMessage();
+
+        const payload = {
+            username: usernameInput.value.trim(),
+            password: passwordInput.value
+        };
+
+        // Basic frontend validation
+        if (!payload.username || !payload.password) {
+            showMessage("Please enter username and password.", "error");
+            return;
+        }
+
+        // Disable button while logging in
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Logging in...";
+
+        try {
+            const response = await fetch("http://localhost:8083/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                localStorage.setItem("loggedInUser", data.username);
+                localStorage.setItem("userRole", data.role);
+                localStorage.setItem("userId", data.userId);
+                localStorage.setItem("token", data.jwt);
+
+                showMessage("✅ Login successful! Redirecting...", "success");
+
+                setTimeout(() => {
+                    window.location.href = "landing.html";
+                }, 1200);
+
+            } else {
+                let errorMsg = "Invalid username or password.";
+
+                try {
+                    const errorData = await response.json();
+                    if (errorData.message) {
+                        errorMsg = errorData.message;
+                    }
+                } catch (e) {
+                    // ignore if backend didn't return JSON
+                }
+
+                showMessage("❌ " + errorMsg, "error");
+            }
+
+        } catch (err) {
+            console.error("Login failed:", err);
+            showMessage("❌ Server error. Please try again.", "error");
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Login";
+        }
+    });
+</script>
 
 </body>
 </html>

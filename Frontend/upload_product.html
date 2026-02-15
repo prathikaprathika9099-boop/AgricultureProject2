@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+        /* Existing Styles */
         body {
             margin: 0;
             min-height: 100vh;
@@ -112,6 +113,7 @@
 
         <input type="text" id="name" placeholder="Product Name" required>
         <input type="number" id="cost" placeholder="Cost" required>
+        <input type="number" id="stock" placeholder="Stock Available" required>
         <input type="text" id="description" placeholder="Description" required>
         <input type="file" id="image" accept="image/*" required>
 
@@ -140,10 +142,11 @@
     function uploadProduct() {
         const name = document.getElementById("name").value;
         const cost = document.getElementById("cost").value;
+        const stock = document.getElementById("stock").value;
         const description = document.getElementById("description").value;
         const image = document.getElementById("image").files[0];
 
-        if (!name || !cost || !description || !image) {
+        if (!name || !cost || !stock || !description || !image) {
             alert("Fill all fields");
             return;
         }
@@ -151,6 +154,7 @@
         const formData = new FormData();
         formData.append("name", name);
         formData.append("cost", cost);
+        formData.append("stock", stock);
         formData.append("description", description);
         formData.append("image", image);
         formData.append("userId", userId);
@@ -166,6 +170,7 @@
 
             document.getElementById("name").value = "";
             document.getElementById("cost").value = "";
+            document.getElementById("stock").value = "";
             document.getElementById("description").value = "";
             document.getElementById("image").value = "";
         })

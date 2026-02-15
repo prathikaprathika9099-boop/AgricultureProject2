@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:63342")
@@ -22,7 +24,6 @@ public class AuthController {
 
     @PostMapping("/api/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
-        System.out.println("Login page");
         try{
             LoginResponseDto responseDto=authService.login(loginRequestDto);
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -32,13 +33,16 @@ public class AuthController {
     }
 
     @PostMapping("/api/signup")
-    public ResponseEntity<SignupResponseDto> signup(@RequestBody SignupRequestDto signupRequestDto){
-        System.out.println("Sign up page");
+    public ResponseEntity<Map<String, String>> signup(@RequestBody SignupRequestDto signupRequestDto){
         try{
-            SignupResponseDto responseDto=authService.signup(signupRequestDto);
-            return new ResponseEntity<>(responseDto,HttpStatus.CREATED);
-        }catch (IllegalArgumentException exception){
-            return ResponseEntity.badRequest().build();
+            SignupResponseDto responseDto = authService.signup(signupRequestDto);
+            return new ResponseEntity<>(Map.of(
+                    "id", String.valueOf(responseDto.getUserId()),
+                    "username", responseDto.getUsername()
+            ), HttpStatus.CREATED);
+        } catch (IllegalArgumentException exception){
+            // Return the exception message as JSON
+            return new ResponseEntity<>(Map.of("message", exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }

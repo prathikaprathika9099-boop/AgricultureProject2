@@ -1,5 +1,6 @@
 package com.example.AgriProject.controller;
 
+import com.example.AgriProject.dto.ProductUpdateRequestDto;
 import com.example.AgriProject.dto.ProductUploadDto;
 import com.example.AgriProject.dto.ProductUploadResponseDto;
 import com.example.AgriProject.entity.Product;
@@ -29,5 +30,17 @@ public class ProductController {
     @GetMapping("/get/all/products")
     public  List<Product> getAllProducts(){
         return productService.getAllProducts();
+    }
+
+    @PutMapping("/product/update/{id}")
+    public ResponseEntity<String> updateProduct(@PathVariable Long id, @RequestBody ProductUpdateRequestDto dto){
+        return productService.editProduct(id,dto);
+    }
+
+    @DeleteMapping("/product/delete/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id){
+        productService.deleteProduct(id);
+
+        return ResponseEntity.ok("Product deleted successfully");
     }
 }

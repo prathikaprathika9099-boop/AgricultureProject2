@@ -30,7 +30,14 @@ public class Product {
     private String description;
 
     @ManyToOne
-    @JsonIgnore
+    @JsonBackReference
     @JoinColumn(name = "user_id")//owning side
     private User user;
+
+    private int stock;
+
+    private int reservedStock;
+
+    @Version
+    private Long version;
 }

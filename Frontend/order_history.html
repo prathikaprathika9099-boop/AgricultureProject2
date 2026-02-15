@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders | AgriBazaar</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #e8f5e9;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e7d32;
+        }
+
+        .header-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-buttons a {
+            background-color: #2e7d32;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .header-buttons a:hover { background-color: #1b5e20; }
+
+        .order-card {
+            background: white;
+            padding: 18px;
+            margin-bottom: 18px;
+            border-radius: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .order-top {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #1b5e20;
+            font-size: 18px;
+        }
+
+        .status {
+            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #c8e6c9;
+            color: #1b5e20;
+            font-size: 14px;
+        }
+
+        .items {
+            margin-top: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 12px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .item:last-child { border-bottom: none; }
+
+        .total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #2e7d32;
+        }
+
+        .address {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #444;
+            background: #f1f8e9;
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .empty-orders {
+            text-align: center;
+            font-size: 22px;
+            color: #555;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>My Orders</h1>
+
+<div class="header-buttons">
+    <a href="landing.html">Home</a>
+    <a href="cart.html">My Cart</a>
+</div>
+
+<div id="ordersContainer"></div>
+
+<script>
+    const userId = Number(localStorage.getItem("userId"));
+    const ordersContainer = document.getElementById("ordersContainer");
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    }
+
+    async function loadOrders() {
+        const res = await fetch(`http://localhost:8083/orders/user/${userId}`);
+
+        if (!res.ok) {
+            ordersContainer.innerHTML = `<div class="empty-orders">⚠ Unable to load orders</div>`;
+            return;
+        }
+
+        const orders = await res.json();
+
+        if (!orders || orders.length === 0) {
+            ordersContainer.innerHTML = `<div class="empty-orders">📦 No orders found</div>`;
+            return;
+        }
+
+        ordersContainer.innerHTML = "";
+
+        orders.reverse().forEach(order => {
+            const itemsHtml = order.items.map(it => `
+                <div class="item">
+                    <div>
+                        <strong>${it.productName}</strong><br>
+                        ₹ ${it.price} × ${it.quantity}
+                    </div>
+                    <div>
+                        ₹ ${it.price * it.quantity}
+                    </div>
+                </div>
+            `).join("");
+
+            // Address
+            const addr = order.address || {};
+            const addressHtml = `
+                <div class="address">
+                    <strong>Delivery Address</strong><br>
+                    ${addr.fullName || ""}<br>
+                    ${addr.house || ""}, ${addr.street || ""}<br>
+                    ${addr.city || ""}, ${addr.state || ""} - ${addr.pincode || ""}<br>
+                    📞 ${addr.phone || ""}
+                </div>
+            `;
+
+            ordersContainer.innerHTML += `
+                <div class="order-card">
+                    <div class="order-top">
+                        <div class="order-id">Order #${order.id}</div>
+                        <div class="status">${order.status}</div>
+                    </div>
+
+                    <div><strong>Ordered On:</strong> ${formatDate(order.orderDate)}</div>
+
+                    <div class="items">
+                        <strong>Items</strong>
+                        ${itemsHtml}
+                    </div>
+
+                    ${addressHtml}
+
+                    <div class="total">
+                         Cart Total: ₹ ${(order.totalAmount - (order.shippingFee || 0)).toFixed(2)} <br>
+                        Shipping Fee: ₹ ${(order.shippingFee || 0).toFixed(2)} <br><br>
+                        Total Paid: ₹ ${order.totalAmount.toFixed(2)}
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    loadOrders();
+</script>
+
+</body>
+</html>

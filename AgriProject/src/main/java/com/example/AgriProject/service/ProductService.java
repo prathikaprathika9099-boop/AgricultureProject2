@@ -1,17 +1,23 @@
 package com.example.AgriProject.service;
 
+import com.example.AgriProject.dto.ProductUpdateRequestDto;
 import com.example.AgriProject.dto.ProductUploadDto;
 import com.example.AgriProject.dto.ProductUploadResponseDto;
+import com.example.AgriProject.entity.CartItem;
 import com.example.AgriProject.entity.Product;
 import com.example.AgriProject.entity.User;
+import com.example.AgriProject.repository.CartItemRepository;
+import com.example.AgriProject.repository.CartRepository;
 import com.example.AgriProject.repository.ProductRepository;
 import com.example.AgriProject.repository.UserRepository;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -26,11 +32,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
 
-    @Autowired
     private final ProductRepository productRepository;
-
-    @Autowired
     private final UserRepository userRepository;
+    private final CartItemRepository cartItemRepository;
+    private final CartService cartService;
+    private final CartRepository cartRepository;
 
     private final ModelMapper modelMapper;
 
@@ -50,9 +56,11 @@ public class ProductService {
         Product product=Product.builder()
                         .name(productUploadDto.getName())
                         .imageUrl("/uploads/"+filename)
+                        .stock(productUploadDto.getStock())
                         .cost(productUploadDto.getCost())
                         .description(productUploadDto.getDescription())
                         .user(user)
+                        .reservedStock(0)
                        .build();
         Product saved=productRepository.save(product);
 
@@ -67,5 +75,65 @@ public class ProductService {
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
+    }
+
+    @Transactional
+    public ResponseEntity<String> editProduct(Long id,ProductUpdateRequestDto dto){
+        try{
+            Product product=productRepository.findById(id).orElse(null);
+
+            if(product==null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+            }
+
+            boolean isPriceUpdated = dto.getPrice()!=null;
+            boolean isStockUpdated = dto.getStock()!=null;
+
+            if (dto.getPrice() != null && dto.getPrice() < 0) {
+                return ResponseEntity.badRequest().body("Price cannot be negative");
+            }
+
+            if (dto.getStock() != null && dto.getStock() < 0) {
+                return ResponseEntity.badRequest().body("Stock cannot be negative");
+            }
+
+            if (isPriceUpdated) {
+                product.setCost(dto.getPrice());
+            }
+
+            if (isStockUpdated) {
+                product.setStock(dto.getStock());
+            }
+            productRepository.save(product);
+
+            if(isStockUpdated){
+                int newStock=product.getStock();
+
+                if(newStock==0)
+                    cartItemRepository.deleteCartItemsIfStockZero(id,newStock);
+
+                else
+                    cartItemRepository.reduceCartItemsQuantityIfStockLess(id,newStock);
+            }
+
+            if(isPriceUpdated){
+                cartItemRepository.updateCartItemsPrice(id,product.getCost());
+            }
+
+            if(isPriceUpdated || isStockUpdated){
+                cartRepository.recalculateTotalForCartsContainingProduct(id);
+            }
+
+            return ResponseEntity.ok("Product updated successfully");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update product");
+        }
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        cartItemRepository.deleteByProductId(id);
+        productRepository.deleteById(id);
+        cartService.updateCartTotals();
     }
 }

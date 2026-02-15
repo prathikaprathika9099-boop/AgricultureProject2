@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unprinted Orders</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #4fa65b;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin: 30px 0 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 28px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 14px;
+            text-align: center;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .order-details {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .total-amount {
+            font-weight: bold;
+            color: #1b5e20;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .mark-printed-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .mark-printed-btn:hover {
+            background: #1b5e20;
+        }
+
+        .print-btn {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .print-btn:hover {
+            background: #1565c0;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                padding: 16px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Unprinted Orders</h1>
+
+<div class="grid" id="ordersGrid"></div>
+
+<script>
+    async function loadUnprintedOrders() {
+        const res = await fetch("http://localhost:8083/orders/unprinted");
+        const orders = await res.json();
+
+        const grid = document.getElementById("ordersGrid");
+        grid.innerHTML = "";
+
+        orders.forEach(order => {
+            grid.innerHTML += `
+                <div class="card" id="order-${order.id}">
+                    <h3>Order ID: ${order.id}</h3>
+                    <div class="order-details">Customer: ${order.user.fullName}</div>
+                    <div class="order-details">Total Amount: ₹ ${order.totalAmount}</div>
+                    <div class="order-details">Order Date: ${new Date(order.orderDate).toLocaleString()}</div>
+                    <button class="print-btn" onclick="printOrder(${order.id})">
+                        Print Order
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    async function printOrder(orderId) {
+        const order = document.getElementById(`order-${orderId}`);
+        const printWindow = window.open('', '', 'width=800, height=600');
+        printWindow.document.write('<html><head><title>Print Order</title></head><body>');
+        printWindow.document.write(order.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+
+        printWindow.print();
+
+        printWindow.onafterprint = async () => {
+            // After printing, mark the order as printed
+            try {
+                const res = await fetch(
+                    `http://localhost:8083/orders/${orderId}/print`,
+                    { method: "PUT" }
+                );
+
+                if (!res.ok) {
+                    const err = await res.text();
+                    throw new Error(err);
+                }
+
+                alert("Order marked as printed successfully");
+                // Optionally, remove the order from the displayed list
+                document.getElementById(`order-${orderId}`).remove();
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        };
+    }
+
+    loadUnprintedOrders();
+</script>
+
+</body>
+</html>

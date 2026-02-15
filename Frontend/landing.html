@@ -59,62 +59,63 @@
         /* ===== PROFILE DROPDOWN ===== */
         .profile-wrapper {
             position: relative;
-            padding-bottom: 10px; /* 👈 buffer zone */
-}
+            padding-bottom: 10px;
+        }
 
-       .profile-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 25px;
-    background: rgba(255,255,255,0.18);
-}
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.18);
+        }
 
         .profile-dropdown {
-    position: absolute;
-    top: 52px;
-    right: 0;
-    background: white;
-    color: #333;
-    width: 220px;
-    border-radius: 14px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-8px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    pointer-events: none;
-}
+            position: absolute;
+            top: 52px;
+            right: 0;
+            background: white;
+            color: #333;
+            width: 220px;
+            border-radius: 14px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
 
         .profile-wrapper:hover .profile-dropdown,
-.profile-dropdown:hover {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    pointer-events: auto;
-}
+        .profile-dropdown:hover {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
 
         .profile-dropdown a {
-    display: block;
-    padding: 14px 18px;
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    transition: background 0.3s;
-    cursor: pointer;
-}
+            display: block;
+            padding: 14px 18px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
 
         .profile-dropdown a:hover {
-    background: #f1f8e9;
-}
+            background: #f1f8e9;
+        }
 
-.profile-dropdown .logout {
-    color: #c62828;
-    font-weight: bold;
-}
+        .profile-dropdown .logout {
+            color: #c62828;
+            font-weight: bold;
+        }
+
         /* ===== HERO ===== */
         .hero {
             height: 100vh;
@@ -222,10 +223,10 @@
 
 <!-- HERO -->
 <div class="hero">
-    <h1>🌱 Welcome to AgriBazaar</h1>
+    <h1>🌱 Welcome to ABC</h1>
     <p>
         A smart platform connecting farmers and buyers to trade crops efficiently,
-        transparently and sustainably.
+        transparently, and sustainably.
     </p>
     <button class="cta" onclick="scrollToServices()">Explore Services</button>
 </div>
@@ -247,7 +248,7 @@
     <h2>🚜 What We Serve</h2>
     <p>
         AgriBazaar empowers farmers and buyers with transparent trading,
-        real-time pricing and secure transactions.
+        real-time pricing, and secure transactions.
     </p>
 </div>
 
@@ -268,10 +269,16 @@
         window.location.href = "cart.html";
     }
 
+    function goToAddressPage() {
+        window.location.href = "addresses.html";  // Redirect to the new address page
+    }
+
     function logout() {
-        localStorage.removeItem("loggedInUser");
-        localStorage.removeItem("userRole");
-        location.reload();
+         localStorage.removeItem("loggedInUser");
+         localStorage.removeItem("userRole");
+         localStorage.removeItem("userId");
+         localStorage.removeItem("token");
+         location.reload();
     }
 
     function checkLogin() {
@@ -288,10 +295,14 @@
         let links = "";
 
         if (role === "FARMER") {
-            links += `<a onclick="goToUpload()">📤 Upload Product</a>`;
+            links += `<a onclick="goToUpload()">📤 Upload Product</a>
+            <a onclick="downloadOrdersExcel()">📥 Download Orders Excel</a>
+            `;
+
         }
 
         links += `
+            <a onclick="goToAddressPage()">📍 Store Address</a>
             <a onclick="goToCart()">🛒 Cart</a>
             <a class="logout" onclick="logout()">🚪 Logout</a>
         `;
@@ -310,6 +321,35 @@
         document.getElementById("services")
             .scrollIntoView({ behavior: "smooth" });
     }
+
+    async function downloadOrdersExcel() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Please login again.");
+        return;
+    }
+
+    const response = await fetch("http://localhost:8083/admin/orders/export", {
+        method: "GET",
+        headers: {
+            Authorization: "Bearer " + token
+        }
+    });
+
+    if (!response.ok) {
+        alert("You are not allowed or export failed!");
+        return;
+    }
+
+    const blob = await response.blob();
+
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = "orders.xlsx";
+    link.click();
+}
+
 
     async function loadHomeProducts() {
         const res = await fetch("http://localhost:8083/get/all/products");

@@ -23,6 +23,7 @@
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 12px;
+            align-items: center;
         }
 
         .cart-item img {
@@ -32,14 +33,33 @@
             border-radius: 10px;
         }
 
-        .details {
-            flex: 1;
-        }
+        .details { flex: 1; }
 
         .price {
             font-weight: bold;
             color: #1b5e20;
         }
+
+        .qty-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .qty-btn {
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            background: #2e7d32;
+            color: white;
+        }
+
+        .qty-btn:hover { background: #1b5e20; }
+
+        .delete-btn { background: #c62828; }
+        .delete-btn:hover { background: #8e0000; }
 
         .total {
             text-align: right;
@@ -54,6 +74,183 @@
             color: #555;
             margin-top: 50px;
         }
+
+        .order-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            background: #2e7d32;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover { background: #1b5e20; }
+
+        .address-section {
+            display: none;
+            background: white;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 15px;
+        }
+
+        .address-card {
+            display: flex;
+            gap: 12px;
+            border: 1px solid #ccc;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .address-card:hover { background: #f1f8e9; }
+
+        .header-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-buttons a {
+            background-color: #2e7d32;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .header-buttons a:hover { background-color: #1b5e20; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 25px;
+            width: 350px;
+            border-radius: 15px;
+        }
+
+        .modal-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Ripple */
+        .ripple {
+            position: fixed;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: rippleEffect 0.7s linear;
+            background: rgba(46,125,50,0.5);
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(15);
+                opacity: 0;
+            }
+        }
+
+        /* PAYMENT SUCCESS ANIMATION */
+.payment-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+    backdrop-filter: blur(2px);
+}
+
+.coin {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #a5ffb0, #2e7d32);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 52px;
+    color: white;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    animation: coinPop 0.75s ease forwards;
+    position: relative;
+}
+
+@keyframes coinPop {
+    0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+    60%  { transform: scale(1.15) rotate(240deg); opacity: 1; }
+    100% { transform: scale(1) rotate(360deg); opacity: 1; }
+}
+
+/* ripple rings */
+.ring {
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    border: 3px solid rgba(46,125,50,0.55);
+    animation: ringWave 1.2s ease-out forwards;
+}
+
+.ring:nth-child(2) { animation-delay: 0.15s; }
+.ring:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes ringWave {
+    0%   { transform: scale(0.6); opacity: 0.7; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* spark burst */
+.spark {
+    position: absolute;
+    width: 6px;
+    height: 18px;
+    background: rgba(46,125,50,0.85);
+    border-radius: 5px;
+    top: 50%;
+    left: 50%;
+    transform-origin: 0px 0px;
+    animation: sparkOut 0.8s ease forwards;
+}
+
+@keyframes sparkOut {
+    0%   { transform: translate(-50%, -50%) rotate(var(--rot)) translateX(0); opacity: 1; }
+    100% { transform: translate(-50%, -50%) rotate(var(--rot)) translateX(90px); opacity: 0; }
+}
+
+
     </style>
 </head>
 
@@ -61,65 +258,321 @@
 
 <h1>My Cart</h1>
 
+<div class="header-buttons">
+    <a href="landing.html">Home</a>
+    <a href="order_history.html">My Orders</a>
+</div>
+
 <div id="cartContainer"></div>
 <div class="total" id="totalAmount"></div>
 
+<div class="order-section" id="orderSection" style="display:none;">
+    <button class="btn" onclick="showAddressSection()">Place Order</button>
+</div>
+
+<div class="address-section" id="addressSection">
+    <h2>Select Delivery Address</h2>
+    <div id="addressList"></div>
+
+    <button class="btn" onclick="goToAddAddress()">➕ Add New Address</button>
+    <br><br>
+
+    <p id="addressWarning"
+       style="color:#c62828; font-weight:bold; display:none; margin-top:10px;">
+        ⚠ Please select a delivery address
+    </p>
+
+
+    <button class="btn" id="proceedBtn"
+            style="display:none;"
+            onclick="proceedToPayment(event)">
+        Proceed to Payment
+    </button>
+</div>
+
+<!-- Address Modal -->
+<div id="addressModal" class="modal">
+    <div class="modal-box">
+        <h3>Add Address</h3>
+        <input id="fullName" placeholder="Full Name">
+        <input id="phone" placeholder="Phone">
+        <input id="house" placeholder="House">
+        <input id="street" placeholder="Street">
+        <input id="city" placeholder="City">
+        <input id="state" placeholder="State">
+        <input id="pincode" placeholder="Pincode">
+        <div class="modal-actions">
+            <button class="btn" onclick="saveAddress()">Save</button>
+            <button class="btn" onclick="closeAddressModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const userId = Number(localStorage.getItem("userId"));
+
+    if (!userId) {
+        alert("Please login first");
+        window.location.href = "login.html";
+    }
+
     const container = document.getElementById("cartContainer");
     const totalDiv = document.getElementById("totalAmount");
+    const orderSection = document.getElementById("orderSection");
+    const proceedBtn = document.getElementById("proceedBtn");
+
+    let cartBaseTotal = 0;
+    let selectedShipping = 0;   // ✅ FIX ADDED
+
+    const shippingRates = {
+        "bangalore": 40,
+        "mysore": 75,
+        "udupi": 150,
+        "tumkuru": 50,
+        "mangalore": 120,
+        "hubli": 100,
+        "shivamogga": 90,
+        "belgaum": 110
+    };
 
     async function loadCart() {
-        try {
-            const res = await fetch(`http://localhost:8083/cart/user/${userId}`);
+        const res = await fetch(`http://localhost:8083/cart/user/${userId}`);
+        if (!res.ok) return showEmptyCart();
 
-            if (!res.ok) {
-                throw new Error("Cart empty");
-            }
+        const cart = await res.json();
+        if (!cart.items || cart.items.length === 0) return showEmptyCart();
 
-            const cart = await res.json();
+        container.innerHTML = "";
 
-            // If cart has no items
-            if (!cart.items || cart.items.length === 0) {
-                showEmptyCart();
-                return;
-            }
-
-            container.innerHTML = "";
-            totalDiv.innerHTML = "";
-
-            cart.items.forEach(item => {
-                container.innerHTML += `
-                    <div class="cart-item">
-                        <img src="${item.product.imageUrl}">
-                        <div class="details">
-                            <h3>${item.product.name}</h3>
-                            <p>Price: ₹ ${item.product.cost}</p>
-                            <p>Quantity: ${item.quantity}</p>
-                            <p class="price">Total: ₹ ${item.subtotal}</p>
-                        </div>
+        cart.items.forEach(item => {
+            container.innerHTML += `
+            <div class="cart-item">
+                <img src="${item.product.imageUrl}">
+                <div class="details">
+                    <h3>${item.product.name}</h3>
+                    <p>Price: ₹ ${item.product.cost}</p>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
+                        <span>${item.quantity}</span>
+                        <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                        <button class="qty-btn delete-btn"
+                            onclick="deleteItem(${item.id})">🗑</button>
                     </div>
-                `;
-            });
+                    <p class="price">Subtotal: ₹ ${item.subtotal}</p>
+                </div>
+            </div>`;
+        });
 
-            totalDiv.innerText = "Total: ₹ " + cart.totalAmount;
-
-        } catch (err) {
-            showEmptyCart();
-        }
+        cartBaseTotal = cart.totalAmount;
+        totalDiv.innerText = "Cart Total: ₹ " + cartBaseTotal;
+        orderSection.style.display = "block";
     }
 
     function showEmptyCart() {
-        container.innerHTML = `
-            <div class="empty-cart">
-                🛒 Your cart is empty
-            </div>
-        `;
+        container.innerHTML = `<div class="empty-cart">🛒 Your cart is empty</div>`;
         totalDiv.innerHTML = "";
+        orderSection.style.display = "none";
+    }
+
+    async function updateQty(cartItemId, delta) {
+        await fetch(`http://localhost:8083/cart/item/update`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cartItemId, delta })
+        });
+        loadCart();
+    }
+
+    async function deleteItem(cartItemId) {
+        if (!confirm("Remove item from cart?")) return;
+
+        await fetch(`http://localhost:8083/cart/item/delete/${cartItemId}`, {
+            method: "DELETE"
+        });
+        loadCart();
+    }
+
+    function showAddressSection() {
+        document.getElementById("addressSection").style.display = "block";
+        loadAddresses();
+    }
+
+    async function loadAddresses() {
+        const res = await fetch(`http://localhost:8083/address/get/${userId}`);
+        if (!res.ok) return;
+
+        const addresses = await res.json();
+        const addressList = document.getElementById("addressList");
+
+        addressList.innerHTML = "";
+
+        addresses.forEach(addr => {
+            addressList.innerHTML += `
+            <label class="address-card">
+                <input type="radio"
+                    name="address"
+                    data-fullname="${addr.fullName}"
+                    data-phone="${addr.phone}"
+                    data-house="${addr.house}"
+                    data-street="${addr.street}"
+                    data-city="${addr.city}"
+                    data-state="${addr.state}"
+                    data-pincode="${addr.pincode}"
+                    onclick="calculateTotal(this)">
+                <div>
+                    <strong>${addr.fullName}</strong><br>
+                    ${addr.house}, ${addr.street}<br>
+                    ${addr.city}, ${addr.state} - ${addr.pincode}<br>
+                    📞 ${addr.phone}
+                </div>
+            </label>`;
+        });
+    }
+
+    function calculateTotal(selected) {
+
+        let city = selected.dataset.city || "";
+        city = city.toLowerCase().trim();
+
+        let shipping = 80;
+
+        for (let key in shippingRates) {
+            if (city.includes(key.toLowerCase())) {
+                shipping = shippingRates[key];
+                break;
+            }
+        }
+
+        selectedShipping = shipping;   // ✅ FIX ADDED
+
+        const finalTotal = cartBaseTotal + shipping;
+
+        totalDiv.innerHTML = `
+            Cart Total: ₹ ${cartBaseTotal} <br>
+            Shipping (${city}): ₹ ${shipping} <br><br>
+            <strong style="color:#2e7d32;">
+                Final Total: ₹ ${finalTotal}
+            </strong>
+        `;
+
+        proceedBtn.style.display = "inline-block";
+    }
+
+    function goToAddAddress() {
+        document.getElementById("addressModal").style.display = "flex";
+    }
+
+    function closeAddressModal() {
+        document.getElementById("addressModal").style.display = "none";
+    }
+
+    async function saveAddress() {
+        const address = {
+            fullName: fullName.value,
+            phone: phone.value,
+            house: house.value,
+            street: street.value,
+            city: city.value,
+            state: state.value,
+            pincode: pincode.value
+        };
+
+        await fetch(`http://localhost:8083/address/add/${userId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(address)
+        });
+
+        closeAddressModal();
+        loadAddresses();
+    }
+
+    async function proceedToPayment(event) {
+
+        const selected = document.querySelector('input[name="address"]:checked');
+        const warning = document.getElementById("addressWarning");
+
+        if (!selected) {
+            warning.style.display = "block";
+            return;
+        }
+
+        warning.style.display = "none";
+
+        const address = {
+            fullName: selected.dataset.fullname,
+            phone: selected.dataset.phone,
+            house: selected.dataset.house,
+            street: selected.dataset.street,
+            city: selected.dataset.city,
+            state: selected.dataset.state,
+            pincode: selected.dataset.pincode
+        };
+
+        const payload = {
+            address: address,
+            shippingFee: selectedShipping
+        };
+
+        const res = await fetch(`http://localhost:8083/orders/place/${userId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            warning.innerText = "⚠ Order failed. Please try again.";
+            warning.style.display = "block";
+            return;
+        }
+
+                // ✅ Disable button to avoid double click
+        proceedBtn.disabled = true;
+        proceedBtn.innerText = "Processing...";
+
+        // ✅ Fullscreen overlay animation (Zomato style)
+        const overlay = document.createElement("div");
+        overlay.className = "payment-overlay";
+
+        const coin = document.createElement("div");
+        coin.className = "coin";
+        coin.innerHTML = "✓";
+
+        // ripple rings
+        const ring1 = document.createElement("div");
+        ring1.className = "ring";
+
+        const ring2 = document.createElement("div");
+        ring2.className = "ring";
+
+        const ring3 = document.createElement("div");
+        ring3.className = "ring";
+
+        coin.appendChild(ring1);
+        coin.appendChild(ring2);
+        coin.appendChild(ring3);
+
+        // sparks
+        for (let i = 0; i < 10; i++) {
+            const spark = document.createElement("div");
+            spark.className = "spark";
+            spark.style.setProperty("--rot", (i * 36) + "deg");
+            coin.appendChild(spark);
+        }
+
+        overlay.appendChild(coin);
+        document.body.appendChild(overlay);
+
+        // Redirect after animation
+        setTimeout(() => {
+            window.location.href = "order_history.html";
+        }, 2500);
+
     }
 
     loadCart();
 </script>
+
 
 </body>
 </html>

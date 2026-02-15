@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Agri Signup</title>
+
     <style>
         body {
             margin: 0;
@@ -28,11 +29,6 @@
             margin-bottom: 20px;
         }
 
-        label {
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
         input, select {
             width: 100%;
             padding: 10px;
@@ -40,6 +36,12 @@
             margin-bottom: 15px;
             border-radius: 6px;
             border: 1px solid #ccc;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border: 1px solid #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
         }
 
         button {
@@ -51,29 +53,49 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: bold;
         }
 
         button:hover {
             background: #1b5e20;
         }
 
-        .popup {
-            margin-top: 15px;
+        .login-link {
+            margin-top: 14px;
             text-align: center;
-            background: #e8f5e9;
-            padding: 10px;
-            border-radius: 6px;
             font-size: 14px;
         }
 
-        .popup a {
+        .login-link a {
             color: #1b5e20;
             font-weight: bold;
             text-decoration: none;
         }
 
-        .popup a:hover {
+        .login-link a:hover {
             text-decoration: underline;
+        }
+
+        /* MESSAGE BOX */
+        .message-box {
+            margin-top: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .message-success {
+            background: #e8f5e9;
+            color: #1b5e20;
+            border: 1px solid #a5d6a7;
+        }
+
+        .message-error {
+            background: #ffebee;
+            color: #b71c1c;
+            border: 1px solid #ef9a9a;
         }
     </style>
 </head>
@@ -84,7 +106,6 @@
     <h2>🌾 Create Account</h2>
 
     <form id="signupForm">
-
         <input type="text" id="username" placeholder="Username" required>
         <input type="email" id="email" placeholder="Email" required>
         <input type="password" id="password" placeholder="Password" required>
@@ -95,55 +116,100 @@
             <option value="BUYER">Buyer</option>
         </select>
 
-        <button type="submit">Sign Up</button>
+        <button type="submit" id="signupBtn">Sign Up</button>
+
+        <!-- MESSAGE AREA -->
+        <div id="messageBox" class="message-box"></div>
     </form>
+
     <div class="login-link">
         <p>Already have an account? <a href="login.html">Login</a></p>
     </div>
-
-    <script>
-        document.getElementById("signupForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-
-            // ✅ Correct way to get values
-            const password = document.getElementById("password").value;
-            const confirm = document.getElementById("confirmPassword").value;
-
-            if(password !== confirm){
-                alert("Passwords do not match");
-                return;
-            }
-
-            const payload = {
-                username: document.getElementById("username").value,
-                email: document.getElementById("email").value,
-                password: password,
-                role: document.getElementById("role").value
-            };
-
-            try {
-                const response = await fetch("http://localhost:8083/api/signup", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if(response.ok){
-                    alert("Signup successful");
-                    window.location.href = "login.html";
-                } else {
-                    alert("Signup failed");
-                }
-            } catch(err) {
-                alert("Server not reachable");
-                console.error(err);
-            }
-        });
-    </script>
-
 </div>
+
+<script>
+    const form = document.getElementById("signupForm");
+    const signupBtn = document.getElementById("signupBtn");
+    const messageBox = document.getElementById("messageBox");
+
+    function showMessage(message, type) {
+        messageBox.style.display = "block";
+        messageBox.classList.remove("message-success", "message-error");
+
+        if (type === "success") {
+            messageBox.classList.add("message-success");
+        } else {
+            messageBox.classList.add("message-error");
+        }
+
+        messageBox.textContent = message;
+    }
+
+    function clearMessage() {
+        messageBox.style.display = "none";
+        messageBox.textContent = "";
+        messageBox.classList.remove("message-success", "message-error");
+    }
+
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        clearMessage();
+
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const role = document.getElementById("role").value;
+
+        // FRONTEND VALIDATION
+        if (!username || !email || !password || !confirmPassword) {
+            showMessage("❌ Please fill all fields.", "error");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showMessage("❌ Passwords do not match.", "error");
+            return;
+        }
+
+        const payload = { username, email, password, role };
+
+        signupBtn.disabled = true;
+        signupBtn.textContent = "Signing up...";
+
+        try {
+            const response = await fetch("http://localhost:8083/api/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                showMessage("✅ Signup successful! Redirecting to login...", "success");
+                setTimeout(() => window.location.href = "login.html", 1200);
+            } else {
+                // READ EXACT BACKEND MESSAGE
+                let errorMsg = "Signup failed. Try again.";
+                try {
+                    const data = await response.json();
+                    if (data.message) {
+                        errorMsg = data.message; // e.g., "User already exists!" or "Email already exists!!"
+                    }
+                } catch (err) {
+                    console.error("Failed to parse backend message:", err);
+                }
+                showMessage("❌ " + errorMsg, "error");
+            }
+
+        } catch (err) {
+            console.error(err);
+            showMessage("❌ Server not reachable.", "error");
+        } finally {
+            signupBtn.disabled = false;
+            signupBtn.textContent = "Sign Up";
+        }
+    });
+</script>
 
 </body>
 </html>

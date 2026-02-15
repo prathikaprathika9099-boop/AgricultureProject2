@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Seller Orders</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f3f7f3;
+            padding: 20px;
+        }
+
+        .order {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>📦 Pending Orders</h2>
+<div id="orders"></div>
+
+<script>
+    const sellerId = localStorage.getItem("userId");
+    const container = document.getElementById("orders");
+
+    async function loadOrders() {
+        const res = await fetch(`http://localhost:8083/seller/orders/${sellerId}`);
+        const orders = await res.json();
+
+        container.innerHTML = "";
+
+        if (orders.length === 0) {
+            container.innerHTML = "No new orders 🎉";
+            return;
+        }
+
+        orders.forEach(o => {
+            container.innerHTML += `
+                <div class="order" id="order-${o.orderId}">
+                    <div class="row">
+                        <strong>Order #${o.orderId}</strong>
+                        <span>₹ ${o.totalAmount}</span>
+                    </div>
+
+                    <p>
+                        ${o.productName} × ${o.quantity}
+                    </p>
+
+                    <p>
+                        ${o.customerName}<br>
+                        ${o.address}<br>
+                        📞 ${o.phone}
+                    </p>
+
+                    <button onclick="printOrder(${o.orderId})">
+                        🖨 Print & Mark Done
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    async function printOrder(orderId) {
+        window.print(); // browser print
+
+        await fetch(`http://localhost:8083/seller/orders/printed/${orderId}`, {
+            method: "POST"
+        });
+
+        document.getElementById(`order-${orderId}`).remove();
+    }
+
+    loadOrders();
+</script>
+
+</body>
+</html>

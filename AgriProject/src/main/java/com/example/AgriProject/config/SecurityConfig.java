@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
-
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -44,10 +45,26 @@ public class SecurityConfig {
                                 "/api/signup",
                                 "/upload/image",
                                 "/get/product",
-                                "/uploads/**"  , // ⭐ THIS IS THE FIX
+                                "/uploads/**"  ,
                                 "/get/all/products",
                                 "/cart/add",
-                                "cart/user/{userId}"
+                                "/cart/user/{userId}",
+                                "/address/add/{userId}",
+                                "/address/get/{userId}",
+                                "/payment/create-order",
+                                "/payment/confirm",
+                                "/cart/item/update",
+                                "/cart/item/delete/{cartItemId}",
+                                "/cart/user/{userId}",
+                                "/cart/add",
+                                "/orders/user/{userId}",
+                                "/seller/order/{sellerId}",
+                                "/seller/order/printed/{orderId}",
+                                "/product/update/{id}",
+                                "/product/delete/{id}",
+                                "/orders/place/{userId}",
+                                "/admin/orders/export",
+                                "/admin/orders/export/by-date"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -14,4 +14,5 @@ public class ProductUploadDto {
     private double cost;
     private String description;
     private Long userId;
+    private int stock;
 }

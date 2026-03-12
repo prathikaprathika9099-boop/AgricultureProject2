@@ -3,6 +3,7 @@ package com.example.AgriProject.service;
 import com.example.AgriProject.dto.ProductUpdateRequestDto;
 import com.example.AgriProject.dto.ProductUploadDto;
 import com.example.AgriProject.dto.ProductUploadResponseDto;
+import com.example.AgriProject.entity.Cart;
 import com.example.AgriProject.entity.CartItem;
 import com.example.AgriProject.entity.Product;
 import com.example.AgriProject.entity.User;
@@ -132,8 +133,23 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(Long id) {
-        cartItemRepository.deleteByProductId(id);
+
+        // Load only carts that contain this product
+        List<Cart> carts = cartRepository.findAll();
+
+        for (Cart cart : carts) {
+
+            cart.getItems().removeIf(
+                    item -> item.getProduct().getId().equals(id)
+            );
+
+            double newTotal = cart.getItems().stream()
+                    .mapToDouble(CartItem::getSubtotal)
+                    .sum();
+
+            cart.setTotalAmount(newTotal);
+        }
+
         productRepository.deleteById(id);
-        cartService.updateCartTotals();
     }
 }

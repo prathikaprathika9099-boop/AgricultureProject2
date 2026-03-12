@@ -8,10 +8,7 @@ import com.example.AgriProject.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -44,5 +41,10 @@ public class AuthController {
             // Return the exception message as JSON
             return new ResponseEntity<>(Map.of("message", exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/api/check-first-user")
+    public boolean isFirstUser(){
+        return authService.isFirstUser();
     }
 }

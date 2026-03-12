@@ -1,274 +1,628 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Manage Addresses</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <style>
+        :root {
+          --bg: #f6f7fb;
+          --card: #ffffff;
+          --text: #1f2937;
+          --muted: #6b7280;
+
+          --green: #2e7d32;
+          --green2: #43a047;
+
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+          --shadow2: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+          --radius: 16px;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Segoe UI", system-ui, Arial, sans-serif;
         }
 
         body {
-            background-color: #f4f4f4;
-            color: #333;
+          background: var(--bg);
+          color: var(--text);
+          min-height: 100vh;
         }
 
-        header {
-            padding: 20px;
-            background-color: #2e7d32;
-            color: white;
-            text-align: center;
+        /* ===== HEADER ===== */
+        .header {
+          background: linear-gradient(135deg, var(--green), #1b5e20);
+          color: white;
+          padding: 18px 16px;
+          text-align: center;
+          box-shadow: var(--shadow2);
+          position: sticky;
+          top: 0;
+          z-index: 10;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
-        .section {
-            padding: 40px;
-            text-align: center;
+        .header h1 {
+          font-size: clamp(18px, 2vw, 22px);
+          font-weight: 800;
+          letter-spacing: 0.3px;
         }
 
-        h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
+        .home-btn {
+          position: absolute;
+          right: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+
+          background: rgba(255, 255, 255, 0.18);
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          color: white;
+
+          padding: 10px 14px;
+          border-radius: 12px;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+
+          transition: 0.2s ease;
         }
 
-        button {
-            padding: 12px 25px;
-            background-color: #43a047;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+        .home-btn:hover {
+          background: rgba(255, 255, 255, 0.28);
         }
 
-        button:hover {
-            background-color: #388e3c;
+        @media (max-width: 520px) {
+          .home-btn {
+            padding: 8px 10px;
+            font-size: 13px;
+            right: 10px;
+          }
+        }
+
+        /* ===== LAYOUT ===== */
+        .page {
+          width: min(1100px, 92%);
+          margin: 22px auto;
+          padding-bottom: 30px;
+        }
+
+        .top-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 10px;
+        }
+
+        .title-area h2 {
+          font-size: clamp(18px, 2.4vw, 26px);
+          margin-bottom: 6px;
+          font-weight: 900;
+        }
+
+        /* ===== STATUS MESSAGE (NEW) ===== */
+        #statusMessage {
+          margin-top: 8px;
+          margin-bottom: 12px;
+          padding: 12px 14px;
+          border-radius: 14px;
+          font-size: 14px;
+          font-weight: 800;
+          display: none;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        #statusMessage.success {
+          display: block;
+          background: rgba(67, 160, 71, 0.12);
+          color: #1b5e20;
+          border-color: rgba(67, 160, 71, 0.25);
+        }
+
+        #statusMessage.error {
+          display: block;
+          background: rgba(198, 40, 40, 0.1);
+          color: #b71c1c;
+          border-color: rgba(198, 40, 40, 0.25);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+          border: none;
+          cursor: pointer;
+          border-radius: 12px;
+          padding: 12px 16px;
+          font-size: 15px;
+          font-weight: 800;
+          transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          user-select: none;
+          white-space: nowrap;
+        }
+
+        .btn:active {
+          transform: scale(0.98);
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, var(--green2), var(--green));
+          color: white;
+          box-shadow: 0 10px 18px rgba(67, 160, 71, 0.25);
+        }
+
+        .btn-primary:hover {
+          filter: brightness(1.02);
+          box-shadow: 0 14px 22px rgba(67, 160, 71, 0.3);
+        }
+
+        .btn-secondary {
+          background: #e5e7eb;
+          color: #111827;
+        }
+
+        .btn-secondary:hover {
+          background: #d1d5db;
+        }
+
+        /* ===== ADDRESS GRID ===== */
+        #addressList {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 14px;
+          margin-top: 12px;
+        }
+
+        @media (max-width: 980px) {
+          #addressList {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 640px) {
+          #addressList {
+            grid-template-columns: 1fr;
+          }
+
+          .top-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .btn {
+            width: 100%;
+          }
         }
 
         .address-card {
-            background: #fff;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: left;
-            cursor: pointer;
-            transition: transform 0.3s ease;
+          background: var(--card);
+          padding: 16px;
+          border-radius: var(--radius);
+          box-shadow: var(--shadow);
+          border: 1px solid rgba(0, 0, 0, 0.06);
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+          position: relative;
+          overflow: hidden;
         }
 
-        .address-card:hover {
-            transform: scale(1.05);
+        @media (hover: hover) {
+          .address-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow2);
+          }
         }
 
-        .address-details {
-            margin-top: 10px;
+        .address-card strong {
+          font-size: 16px;
+          font-weight: 900;
+          display: block;
+          margin-bottom: 6px;
         }
 
-        /* ===== ADDRESS MODAL ===== */
+        .address-card .line {
+          color: #374151;
+          font-size: 14px;
+          line-height: 1.45;
+        }
+
+        .address-card .phone {
+          margin-top: 10px;
+          font-size: 14px;
+          color: var(--muted);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .badge {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          font-size: 12px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: rgba(67, 160, 71, 0.1);
+          color: var(--green);
+          font-weight: 900;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 28px 16px;
+          border-radius: var(--radius);
+          background: white;
+          box-shadow: var(--shadow);
+          border: 1px dashed rgba(0, 0, 0, 0.15);
+          color: var(--muted);
+        }
+
+        /* ===== MODAL ===== */
         #addressModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 100;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;  /* Align at the top of the page */
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.55);
+          display: none;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          z-index: 100;
+          backdrop-filter: blur(3px);
         }
 
         #addressModal.show {
-            display: flex;
-            opacity: 1;
-            visibility: visible;
+          display: flex;
         }
 
         .modal-box {
-            background: #fff;
-            width: 90%;
-            max-width: 500px;
-            padding: 25px;
-            margin-top: 50px;  /* Add space from top */
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.5s ease-out;
+          background: white;
+          width: min(520px, 100%);
+          padding: 18px;
+          border-radius: 18px;
+          box-shadow: var(--shadow2);
+          animation: pop 0.25s ease-out;
         }
 
-        .modal-box h3 {
-            margin-bottom: 20px;
-            font-size: 1.5rem;
+        @keyframes pop {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
 
-        .modal-box input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
+        .modal-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 14px;
         }
 
-        .modal-box button {
-            padding: 12px 20px;
-            background-color: #43a047;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
+        .modal-header h3 {
+          font-size: 18px;
+          font-weight: 900;
+          margin: 0;
         }
 
-        .modal-box button:hover {
-            background-color: #388e3c;
+        .modal-header p {
+          margin-top: 6px;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.4;
         }
 
-        .modal-box .cancel-btn {
-            background-color: #e0e0e0;
-            color: #333;
-            margin-top: 10px;
+        .close-x {
+          border: none;
+          background: #f3f4f6;
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 18px;
+          font-weight: 900;
+          transition: background 0.2s ease;
         }
 
-        .modal-box .cancel-btn:hover {
-            background-color: #bdbdbd;
+        .close-x:hover {
+          background: #e5e7eb;
         }
 
-        /* Animation for modal */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        /* ===== FORM ===== */
+        .form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-top: 10px;
         }
 
-        /* Green checkmark container */
-        .success-message {
-            display: none;
-            color: #43a047;
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 20px;
+        .form-grid .full {
+          grid-column: 1 / -1;
+        }
+
+        @media (max-width: 520px) {
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .field label {
+          display: block;
+          font-size: 13px;
+          font-weight: 800;
+          color: #374151;
+          margin-bottom: 6px;
+        }
+
+        .field input {
+          width: 100%;
+          padding: 12px 12px;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          border-radius: 12px;
+          font-size: 14px;
+          outline: none;
+          transition: border 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field input:focus {
+          border-color: rgba(67, 160, 71, 0.7);
+          box-shadow: 0 0 0 4px rgba(67, 160, 71, 0.15);
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        @media (max-width: 520px) {
+          .modal-actions {
+            flex-direction: column;
+          }
+        }
+
+        .modal-actions .btn {
+          width: 100%;
         }
     </style>
 </head>
-<body>
 
-<header>
+<body>
+<header class="header">
     <h1>Manage Addresses</h1>
+
+    <button class="home-btn" onclick="window.location.href='landing.html'">
+        🏠 Home
+    </button>
 </header>
 
-<div class="section">
-    <button onclick="openAddressModal()">Add New Address</button>
-    <div id="addressList"></div>
-    <!-- Success message for address saved -->
-    <div id="successMessage" class="success-message">
-        ✔️ Address saved successfully!
+<main class="page">
+    <div class="top-row">
+        <div class="title-area">
+            <h2>Your Saved Addresses</h2>
+        </div>
+
+        <button class="btn btn-primary" onclick="openAddressModal()">
+            ➕ Add New Address
+        </button>
     </div>
-</div>
+
+    <!-- ✅ STATUS MESSAGE (no toast, no alert) -->
+    <div id="statusMessage"></div>
+
+    <div id="addressList"></div>
+</main>
 
 <!-- Address Modal -->
-<div id="addressModal" class="modal">
+<div id="addressModal">
     <div class="modal-box">
-        <h3>Add New Address</h3>
-        <input type="text" id="fullName" placeholder="Full Name" required>
-        <input type="text" id="phone" placeholder="Phone Number" required>
-        <input type="text" id="house" placeholder="House / Flat" required>
-        <input type="text" id="street" placeholder="Street" required>
-        <input type="text" id="city" placeholder="City" required>
-        <input type="text" id="state" placeholder="State" required>
-        <input type="text" id="pincode" placeholder="Pincode" required>
-        <button onclick="saveAddress()">Save Address</button>
-        <button class="cancel-btn" onclick="closeAddressModal()">Cancel</button>
+        <div class="modal-header">
+            <div>
+                <h3>Add New Address</h3>
+                <p>Fill in the details below. All fields are required.</p>
+            </div>
+
+            <button class="close-x" onclick="closeAddressModal()">✕</button>
+        </div>
+
+        <div class="form-grid">
+            <div class="field full">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="Eg: Rahul Sharma" required />
+            </div>
+
+            <div class="field">
+                <label>Phone Number</label>
+                <input type="text" id="phone" placeholder="Eg: 9876543210" required />
+            </div>
+
+            <div class="field">
+                <label>Pincode</label>
+                <input type="text" id="pincode" placeholder="Eg: 560001" required />
+            </div>
+
+            <div class="field full">
+                <label>House / Flat</label>
+                <input type="text" id="house" placeholder="Eg: Flat 12B, Sunshine Apartments" required />
+            </div>
+
+            <div class="field full">
+                <label>Street</label>
+                <input type="text" id="street" placeholder="Eg: MG Road" required />
+            </div>
+
+            <div class="field">
+                <label>City</label>
+                <input type="text" id="city" placeholder="Eg: Bengaluru" required />
+            </div>
+
+            <div class="field">
+                <label>State</label>
+                <input type="text" id="state" placeholder="Eg: Karnataka" required />
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="saveAddress()">💾 Save Address</button>
+            <button class="btn btn-secondary" onclick="closeAddressModal()">Cancel</button>
+        </div>
     </div>
 </div>
 
-<script>
-    // Open the modal to add a new address
-    function openAddressModal() {
-        document.getElementById("addressModal").classList.add("show");
-    }
-
-    // Close the address modal
-    function closeAddressModal() {
-        document.getElementById("addressModal").classList.remove("show");
-    }
-
-    // Function to save a new address
-    async function saveAddress() {
-        const userId = localStorage.getItem("userId");
-
-        const address = {
-            fullName: document.getElementById("fullName").value,
-            phone: document.getElementById("phone").value,
-            house: document.getElementById("house").value,
-            street: document.getElementById("street").value,
-            city: document.getElementById("city").value,
-            state: document.getElementById("state").value,
-            pincode: document.getElementById("pincode").value
-        };
-
-        // Send the address data to the backend
-        await fetch(`http://localhost:8083/address/add/${userId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(address)
-        });
-
-        // Show the success message with green checkmark
-        showSuccessMessage();
-        closeAddressModal();
-        loadAddresses();  // Reload the addresses list after saving
-    }
-
-    // Function to show success message
-    function showSuccessMessage() {
-        const successMessage = document.getElementById("successMessage");
-        successMessage.style.display = "block"; // Display the success message
-        setTimeout(() => {
-            successMessage.style.display = "none"; // Hide the success message after 2 seconds
-        }, 2000);
-    }
-
-    // Function to load existing addresses
-    async function loadAddresses() {
-        const userId = localStorage.getItem("userId");
-        const res = await fetch(`http://localhost:8083/address/get/${userId}`);
-        const addresses = await res.json();
-        const addressList = document.getElementById("addressList");
-
-        addressList.innerHTML = "";  // Clear the address list
-
-        addresses.forEach(addr => {
-            addressList.innerHTML += `
-                <div class="address-card">
-                    <div class="address-details">
-                        <strong>${addr.fullName}</strong><br>
-                        ${addr.house}, ${addr.street}<br>
-                        ${addr.city}, ${addr.state} - ${addr.pincode}<br>
-                        📞 ${addr.phone}
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    // Load the addresses when the page loads
-    loadAddresses();
+<script th:inline="javascript">
+    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
 </script>
 
+<script>
+    function openAddressModal() {
+      document.getElementById("addressModal").classList.add("show");
+    }
+
+    function closeAddressModal() {
+      document.getElementById("addressModal").classList.remove("show");
+    }
+
+    function clearForm() {
+      ["fullName", "phone", "house", "street", "city", "state", "pincode"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+    }
+
+    // ✅ status message inside page
+    function showStatus(type, message) {
+      const box = document.getElementById("statusMessage");
+      box.className = "";
+      box.classList.add(type);
+      box.innerText = message;
+
+      // auto hide after 3 sec
+      setTimeout(() => {
+        box.className = "";
+        box.style.display = "none";
+      }, 3000);
+
+      box.style.display = "block";
+    }
+
+    async function saveAddress() {
+      const userId = localStorage.getItem("userId");
+
+      if (!userId) {
+        showStatus("error", "❌ User not logged in. Please login again.");
+        return;
+      }
+
+      const address = {
+        fullName: document.getElementById("fullName").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        house: document.getElementById("house").value.trim(),
+        street: document.getElementById("street").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        state: document.getElementById("state").value.trim(),
+        pincode: document.getElementById("pincode").value.trim()
+      };
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/address/add/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(address)
+        });
+
+        if (!res.ok) {
+          showStatus("error", "❌ Failed to save address. Try again.");
+          return;
+        }
+
+        showStatus("success", "✅ Address saved successfully!");
+        closeAddressModal();
+        clearForm();
+        loadAddresses();
+
+      } catch (err) {
+        showStatus("error", "❌ Server error. Please check backend.");
+      }
+    }
+
+    async function loadAddresses() {
+      const userId = localStorage.getItem("userId");
+      const addressList = document.getElementById("addressList");
+
+      if (!userId) {
+        addressList.innerHTML = `
+          <div class="empty">
+            <h3 style="margin-bottom: 8px; color:#111827;">Not logged in</h3>
+            <p>Please login to view addresses.</p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/address/get/${userId}`);
+        const addresses = await res.json();
+
+        addressList.innerHTML = "";
+
+        if (!addresses || addresses.length === 0) {
+          addressList.innerHTML = `
+            <div class="empty">
+              <h3 style="margin-bottom: 8px; color:#111827;">No addresses found</h3>
+              <p>Add a new address to see it here.</p>
+            </div>
+          `;
+          return;
+        }
+
+        addresses.forEach(addr => {
+          addressList.innerHTML += `
+            <div class="address-card">
+              <div class="badge">Saved</div>
+
+              <strong>${addr.fullName}</strong>
+
+              <div class="line">
+                ${addr.house}, ${addr.street}<br>
+                ${addr.city}, ${addr.state} - ${addr.pincode}
+              </div>
+
+              <div class="phone">📞 ${addr.phone}</div>
+            </div>
+          `;
+        });
+
+      } catch (err) {
+        addressList.innerHTML = `
+          <div class="empty">
+            <h3 style="margin-bottom: 8px; color:#111827;">Error loading addresses</h3>
+            <p>Please check your backend or userId in localStorage.</p>
+          </div>
+        `;
+      }
+    }
+
+    // close modal on outside click
+    document.getElementById("addressModal").addEventListener("click", (e) => {
+      if (e.target.id === "addressModal") closeAddressModal();
+    });
+
+    loadAddresses();
+</script>
 </body>
 </html>

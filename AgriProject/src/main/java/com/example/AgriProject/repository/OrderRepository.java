@@ -12,9 +12,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order,Long> {
-    List<Order> findByUserId(Long userId);
 
-    List<Order> findByUserIdOrderByOrderDateDesc(Long userId);
+    @Query("""
+    SELECT DISTINCT o
+    FROM Order o
+    LEFT JOIN FETCH o.items
+    WHERE o.user.id = :userId
+    ORDER BY o.orderDate DESC
+    """)
+    List<Order> findOrdersWithItems(@Param("userId") Long userId);
 
     List<Order> findByStatusAndPrintedFalse(OrderStatus orderStatus);
 
@@ -37,5 +43,13 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             LocalDateTime start,
             LocalDateTime end
     );
+
+    @Query("""
+   SELECT DISTINCT o FROM Order o
+   JOIN o.items i
+   WHERE o.printed = false
+   AND i.seller.id = :sellerId
+""")
+    List<Order> findUnprintedOrdersForSeller(@Param("sellerId") Long sellerId);
 
 }

@@ -1,131 +1,246 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <title>Agri Signup</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agri Signup | AgriBazaar</title>
 
     <style>
+        :root {
+          --bg1: #0f3d1c;
+          --bg2: #3e9f57;
+          --card: rgba(255, 255, 255, 0.92);
+          --text: #12351c;
+          --muted: #4b5563;
+          --green: #2e7d32;
+          --green2: #1b5e20;
+          --danger: #b71c1c;
+          --radius: 18px;
+          --shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
         body {
-            margin: 0;
-            font-family: Arial;
-            background: linear-gradient(135deg, #1b5e20, #66bb6a);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+          margin: 0;
+          min-height: 100vh;
+          font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+          background: radial-gradient(1000px 700px at 20% 10%, rgba(255,255,255,0.12), transparent 60%),
+                      linear-gradient(135deg, var(--bg1), var(--bg2));
+          display: grid;
+          place-items: center;
+          padding: 18px;
+        }
+
+        .page {
+          width: 100%;
+          max-width: 420px;
+        }
+
+        .brand {
+          text-align: center;
+          color: rgba(255, 255, 255, 0.95);
+          margin-bottom: 14px;
+          line-height: 1.2;
+        }
+
+        .brand h1 {
+          margin: 0;
+          font-size: clamp(20px, 3vw, 26px);
+          font-weight: 800;
+          letter-spacing: 0.2px;
+        }
+
+        .brand p {
+          margin: 6px 0 0;
+          font-size: 14px;
+          opacity: 0.9;
         }
 
         .card {
-            background: #ffffff;
-            width: 380px;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+          width: 100%;
+          background: var(--card);
+          border-radius: var(--radius);
+          box-shadow: var(--shadow);
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          backdrop-filter: blur(10px);
+          padding: 22px;
         }
 
-        h2 {
-            text-align: center;
-            color: #1b5e20;
-            margin-bottom: 20px;
+        .card h2 {
+          margin: 0 0 18px;
+          text-align: center;
+          color: var(--text);
+          font-size: 20px;
+          font-weight: 800;
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            outline: none;
+        .form-grid {
+          display: grid;
+          gap: 12px;
         }
 
-        input:focus, select:focus {
-            border: 1px solid #2e7d32;
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+        label {
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--muted);
+          display: block;
+          margin-bottom: 6px;
+        }
+
+        input {
+          width: 100%;
+          padding: 12px 12px;
+          border-radius: 12px;
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          outline: none;
+          background: rgba(255, 255, 255, 0.95);
+          font-size: 15px;
+          transition: 0.2s ease;
+        }
+
+        input:focus {
+          border-color: rgba(46, 125, 50, 0.7);
+          box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.16);
+        }
+
+        .two-col {
+        display: grid;
+         gap: 12px;
+         }
+
+        @media (min-width: 520px) {
+        .two-col {
+        grid-template-columns: 1fr;
+        }
         }
 
         button {
-            width: 100%;
-            background: #388e3c;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
+          width: 100%;
+          padding: 12px;
+          border: none;
+          border-radius: 14px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: 800;
+          background: linear-gradient(135deg, var(--green), var(--green2));
+          color: white;
+          transition: transform 0.08s ease, filter 0.2s ease;
+          margin-top: 6px;
         }
 
         button:hover {
-            background: #1b5e20;
+          filter: brightness(1.05);
+        }
+
+        button:active {
+          transform: scale(0.99);
+        }
+
+        button:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
         }
 
         .login-link {
-            margin-top: 14px;
-            text-align: center;
-            font-size: 14px;
+          margin-top: 14px;
+          text-align: center;
+          font-size: 14px;
+          color: var(--muted);
         }
 
         .login-link a {
-            color: #1b5e20;
-            font-weight: bold;
-            text-decoration: none;
+          color: var(--green2);
+          font-weight: 800;
+          text-decoration: none;
         }
 
         .login-link a:hover {
-            text-decoration: underline;
+          text-decoration: underline;
         }
 
-        /* MESSAGE BOX */
         .message-box {
-            margin-top: 14px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: center;
-            display: none;
+          margin-top: 12px;
+          padding: 10px 12px;
+          border-radius: 14px;
+          font-size: 14px;
+          text-align: center;
+          display: none;
+          font-weight: 700;
         }
 
         .message-success {
-            background: #e8f5e9;
-            color: #1b5e20;
-            border: 1px solid #a5d6a7;
+          background: #e8f5e9;
+          color: #1b5e20;
+          border: 1px solid #a5d6a7;
         }
 
         .message-error {
-            background: #ffebee;
-            color: #b71c1c;
-            border: 1px solid #ef9a9a;
+          background: #ffebee;
+          color: var(--danger);
+          border: 1px solid #ef9a9a;
         }
+
+        /* Small screens polish */
+         @media (max-width: 380px) {
+         .card { padding: 18px;
+          }
+          button { font-size: 15px;
+          }
     </style>
 </head>
 
 <body>
 
-<div class="card">
-    <h2>🌾 Create Account</h2>
+<div class="page">
+    <div class="brand">
+        <h1>🌾 AgriBazaar</h1>
+        <p>Create your account to buy & sell fresh products</p>
+    </div>
 
-    <form id="signupForm">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+    <div class="card">
+        <h2>Create Account</h2>
 
-        <select id="role">
-            <option value="FARMER">Farmer</option>
-            <option value="BUYER">Buyer</option>
-        </select>
+        <form id="signupForm" class="form-grid">
 
-        <button type="submit" id="signupBtn">Sign Up</button>
+            <div>
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username" required />
+            </div>
 
-        <!-- MESSAGE AREA -->
-        <div id="messageBox" class="message-box"></div>
-    </form>
+            <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter email" required />
+            </div>
 
-    <div class="login-link">
-        <p>Already have an account? <a href="login.html">Login</a></p>
+            <div class="two-col">
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required />
+                </div>
+
+                <div>
+                    <label for="confirmPassword">Confirm</label>
+                    <input type="password" id="confirmPassword" placeholder="Re-enter password" required />
+                </div>
+            </div>
+
+            <button type="submit" id="signupBtn">Sign Up</button>
+
+            <div id="messageBox" class="message-box"></div>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
     </div>
 </div>
+
+<script th:inline="javascript">
+    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
+</script>
 
 <script>
     const form = document.getElementById("signupForm");
@@ -133,83 +248,86 @@
     const messageBox = document.getElementById("messageBox");
 
     function showMessage(message, type) {
-        messageBox.style.display = "block";
-        messageBox.classList.remove("message-success", "message-error");
+      messageBox.style.display = "block";
+      messageBox.classList.remove("message-success", "message-error");
 
-        if (type === "success") {
-            messageBox.classList.add("message-success");
-        } else {
-            messageBox.classList.add("message-error");
-        }
+      if (type === "success") {
+        messageBox.classList.add("message-success");
+      } else {
+        messageBox.classList.add("message-error");
+      }
 
-        messageBox.textContent = message;
+      messageBox.textContent = message;
     }
 
     function clearMessage() {
-        messageBox.style.display = "none";
-        messageBox.textContent = "";
-        messageBox.classList.remove("message-success", "message-error");
+      messageBox.style.display = "none";
+      messageBox.textContent = "";
+      messageBox.classList.remove("message-success", "message-error");
     }
 
-    form.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        clearMessage();
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      clearMessage();
 
-        const username = document.getElementById("username").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        const role = document.getElementById("role").value;
+      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
 
-        // FRONTEND VALIDATION
-        if (!username || !email || !password || !confirmPassword) {
-            showMessage("❌ Please fill all fields.", "error");
-            return;
+      if (!username || !email || !password || !confirmPassword) {
+        showMessage("❌ Please fill all fields.", "error");
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("❌ Password must be at least 6 characters.", "error");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage("❌ Passwords do not match.", "error");
+        return;
+      }
+
+      const payload = { username, email, password };
+
+      signupBtn.disabled = true;
+      signupBtn.textContent = "Signing up...";
+
+      try {
+        // Check if the user is the first to sign up (you would likely need to do this on the backend)
+        const responseCheck = await fetch(`${BACKEND_URL}/api/check-first-user`);
+        const isFirstUser = await responseCheck.json();
+
+        // Assign role based on whether the user is the first one
+        payload.role = isFirstUser ? "FARMER" : "BUYER";
+
+        const response = await fetch(`${BACKEND_URL}/api/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          showMessage("✅ Signup successful! Redirecting...", "success");
+          setTimeout(() => (window.location.href = "login.html"), 1200);
+        } else {
+          let errorMsg = "Signup failed. Try again.";
+          try {
+            const data = await response.json();
+            if (data.message) errorMsg = data.message;
+          } catch (err) {}
+
+          showMessage("❌ " + errorMsg, "error");
         }
-
-        if (password !== confirmPassword) {
-            showMessage("❌ Passwords do not match.", "error");
-            return;
-        }
-
-        const payload = { username, email, password, role };
-
-        signupBtn.disabled = true;
-        signupBtn.textContent = "Signing up...";
-
-        try {
-            const response = await fetch("http://localhost:8083/api/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                showMessage("✅ Signup successful! Redirecting to login...", "success");
-                setTimeout(() => window.location.href = "login.html", 1200);
-            } else {
-                // READ EXACT BACKEND MESSAGE
-                let errorMsg = "Signup failed. Try again.";
-                try {
-                    const data = await response.json();
-                    if (data.message) {
-                        errorMsg = data.message; // e.g., "User already exists!" or "Email already exists!!"
-                    }
-                } catch (err) {
-                    console.error("Failed to parse backend message:", err);
-                }
-                showMessage("❌ " + errorMsg, "error");
-            }
-
-        } catch (err) {
-            console.error(err);
-            showMessage("❌ Server not reachable.", "error");
-        } finally {
-            signupBtn.disabled = false;
-            signupBtn.textContent = "Sign Up";
-        }
+      } catch (err) {
+        showMessage("❌ Server not reachable.", "error");
+      } finally {
+        signupBtn.disabled = false;
+        signupBtn.textContent = "Sign Up";
+      }
     });
 </script>
-
 </body>
 </html>

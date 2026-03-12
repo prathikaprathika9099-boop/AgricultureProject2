@@ -58,4 +58,8 @@ public class AuthService {
 
         return new LoginResponseDto(user.getId(),user.getUsername(),token,user.getRole());
     }
+
+    public boolean isFirstUser() {
+        return userRepository.count()==0;
+    }
 }

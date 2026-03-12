@@ -1,1 +1,11 @@
+# Environment variables
+.env
+
+# Upload folder
 uploads/
+
+# Build files
+target/
+
+# IDE
+.idea/

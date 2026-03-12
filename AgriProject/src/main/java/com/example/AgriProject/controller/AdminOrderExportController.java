@@ -34,8 +34,8 @@ public class AdminOrderExportController {
 
         byte[] excelBytes = excelExportService.exportOrdersToExcel(orders);
 
-        orders.forEach(o -> o.setPrinted(true));
-        orderRepository.saveAll(orders);
+        //orders.forEach(o -> o.setPrinted(true));
+        //orderRepository.saveAll(orders);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orders.xlsx")
@@ -64,8 +64,8 @@ public class AdminOrderExportController {
         byte[] excelBytes = excelExportService.exportOrdersToExcel(orders);
 
         // mark as printed
-        orders.forEach(o -> o.setPrinted(true));
-        orderRepository.saveAll(orders);
+        //orders.forEach(o -> o.setPrinted(true));
+        //orderRepository.saveAll(orders);
 
         String fileName = "orders_" + date + ".xlsx";
 

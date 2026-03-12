@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" />
+    <title>Farmer - Unpacked Orders</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f6f9;
+        }
+
+        header {
+            background: #2e7d32;
+            color: white;
+            padding: 18px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .order-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .customer-info {
+            margin-top: 10px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .items {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .item {
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .total {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .btn {
+            margin-top: 15px;
+            padding: 10px 18px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #1b5e20;
+        }
+
+        .empty {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 18px;
+            color: #777;
+        }
+        .header-buttons {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+
+        .header-buttons a {
+          background: rgba(255, 255, 255, 0.18);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          padding: 10px 14px;
+          border-radius: 12px;
+          text-decoration: none;
+          font-weight: 800;
+          font-size: 14px;
+          transition: 0.2s ease;
+          white-space: nowrap;
+        }
+
+        .header-buttons a:hover {
+          background: rgba(255, 255, 255, 0.28);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .order-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-inner">
+        <h1>📦 Farmer Dashboard – Unpacked Orders</h1>
+
+        <div class="header-buttons">
+            <a href="landing.html">🏠 Home</a>
+            <a href="upload_product.html">📤 Upload Product</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div id="ordersContainer"></div>
+</div>
+
+<script th:inline="javascript">
+    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
+</script>
+
+<script>
+
+    async function loadOrders() {
+
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+            `${BACKEND_URL}/farmer/unprinted-orders`,
+            {
+                headers: {
+                    Authorization: "Bearer " + token
+                }
+            }
+        );
+
+        const orders = await response.json();
+        const container = document.getElementById("ordersContainer");
+
+        container.innerHTML = "";
+
+        if (orders.length === 0) {
+            container.innerHTML = "<div class='empty'>🎉 No unpacked orders</div>";
+            return;
+        }
+
+        orders.forEach(order => {
+
+            let itemsHTML = "";
+
+            order.items.forEach(item => {
+                itemsHTML += `
+                    <div class="item">
+                        • ${item.productName}
+                        (Qty: ${item.quantity})
+                        - ₹${item.price}
+                    </div>
+                `;
+            });
+
+            container.innerHTML += `
+                <div class="order-card" id="order-${order.id}">
+
+                    <div class="order-header">
+                        <div class="order-id">Order #${order.id}</div>
+                    </div>
+
+                    <div class="customer-info">
+                        <strong>Customer:</strong> ${order.fullName}<br>
+                        <strong>Phone:</strong> ${order.phone}<br>
+                        <strong>Address:</strong>
+                        ${order.house}, ${order.street},
+                        ${order.city}, ${order.state} - ${order.pincode}
+                    </div>
+
+                    <div class="items">
+                        <strong>Items:</strong>
+                        ${itemsHTML}
+                    </div>
+
+                    <div class="total">
+                        Total: ₹${order.totalAmount}
+                    </div>
+
+                    <button class="btn" id="btn-${order.id}"
+                            onclick="markPacked(${order.id})">
+                        Mark as Packed
+                    </button>
+
+                    <div id="msg-${order.id}"
+                         style="margin-top:8px; font-weight:600;"></div>
+
+                </div>
+            `;
+        });
+    }
+
+    async function markPacked(orderId) {
+
+        const token = localStorage.getItem("token");
+
+        await fetch(
+            `${BACKEND_URL}/farmer/mark-packed/${orderId}` ,
+            {
+                method: "PUT",
+                headers: {
+                    Authorization: "Bearer " + token
+                }
+            }
+        );
+
+        // Change button state
+        const btn = document.getElementById("btn-" + orderId);
+        btn.innerText = "Packed ✅";
+        btn.disabled = true;
+        btn.style.background = "#4caf50";
+
+        // Show message below button
+        const msg = document.getElementById("msg-" + orderId);
+        msg.innerText = "Order successfully packed.";
+        msg.style.color = "#2e7d32";
+
+        // Optional: remove card after 1.5 seconds
+        setTimeout(() => {
+            const card = document.getElementById("order-" + orderId);
+            card.style.opacity = "0";
+            card.style.transition = "opacity 0.5s ease";
+            setTimeout(() => card.remove(), 500);
+        }, 1500);
+    }
+
+    loadOrders();
+
+</script>
+
+</body>
+</html>

@@ -31,7 +31,7 @@ public class AddressService {
     }
 
     public List<AddressDto> getUserAddress(Long userId){
-        return addressRepository.findByUserId(userId)
+        return addressRepository.findByUser_Id(userId)
                 .stream()
                 .map(address -> modelMapper.map(address,AddressDto.class))
                 .toList();

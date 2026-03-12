@@ -64,7 +64,10 @@ public class SecurityConfig {
                                 "/product/delete/{id}",
                                 "/orders/place/{userId}",
                                 "/admin/orders/export",
-                                "/admin/orders/export/by-date"
+                                "/admin/orders/export/by-date",
+                                "/api/check-first-user",
+                                "/farmer/unprinted-orders",
+                                "/farmer/mark-packed/{orderId}"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

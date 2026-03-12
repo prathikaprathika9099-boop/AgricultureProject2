@@ -1,197 +1,462 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>My Orders | AgriBazaar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
+        :root {
+          --bg1: #0f3d2e;
+          --bg2: #4caf50;
+
+          --card: rgba(255, 255, 255, 0.92);
+          --text: #1f2937;
+          --muted: #6b7280;
+
+          --green: #2e7d32;
+          --green2: #43a047;
+
+          --shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+          --shadow2: 0 10px 26px rgba(0, 0, 0, 0.12);
+
+          --radius: 18px;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Segoe UI", system-ui, Arial, sans-serif;
+        }
+
         body {
-            font-family: Arial;
-            background: #e8f5e9;
-            padding: 20px;
+          min-height: 100vh;
+          padding: 18px;
+          background:
+            radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 55%),
+            radial-gradient(circle at 80% 30%, rgba(255,255,255,0.14), transparent 55%),
+            linear-gradient(135deg, var(--bg1), var(--bg2));
+          color: var(--text);
         }
 
-        h1 {
-            text-align: center;
-            color: #2e7d32;
+        /* background blobs */
+        .blob {
+          position: fixed;
+          width: 260px;
+          height: 260px;
+          border-radius: 50%;
+          filter: blur(35px);
+          opacity: 0.32;
+          z-index: 0;
+          pointer-events: none;
+          animation: float 7s ease-in-out infinite;
         }
 
-        .header-buttons {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
+        .blob.one {
+          background: rgba(67, 160, 71, 0.9);
+          top: -60px;
+          left: -60px;
         }
 
-        .header-buttons a {
-            background-color: #2e7d32;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
+        .blob.two {
+          background: rgba(255, 255, 255, 0.7);
+          bottom: -80px;
+          right: -80px;
+          animation-delay: 1.2s;
         }
 
-        .header-buttons a:hover { background-color: #1b5e20; }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(18px) translateX(12px); }
+        }
+
+        /* layout container */
+        .container {
+          width: min(980px, 100%);
+          margin: 0 auto;
+          position: relative;
+          z-index: 2;
+        }
+
+        /* top bar */
+        .topbar {
+          position: sticky;
+          top: 12px;
+          z-index: 10;
+
+          background: rgba(255, 255, 255, 0.92);
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          backdrop-filter: blur(10px);
+          border-radius: var(--radius);
+          padding: 14px 14px;
+
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+
+          box-shadow: var(--shadow2);
+        }
+
+        .title-wrap h1 {
+          font-size: clamp(18px, 2.4vw, 26px);
+          font-weight: 900;
+          color: #0b2e22;
+          letter-spacing: 0.2px;
+        }
+
+        .title-wrap p {
+          margin-top: 3px;
+          font-size: 13px;
+          color: var(--muted);
+        }
+
+        .actions {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+
+        .btn {
+          text-decoration: none;
+          font-weight: 900;
+          font-size: 14px;
+          padding: 10px 14px;
+          border-radius: 14px;
+          transition: 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 1px solid rgba(0,0,0,0.08);
+          background: white;
+          color: #0b2e22;
+        }
+
+        .btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.10);
+        }
+
+        .btn.primary {
+          background: linear-gradient(135deg, var(--green2), var(--green));
+          color: white;
+          border: none;
+          box-shadow: 0 14px 24px rgba(67, 160, 71, 0.22);
+        }
+
+        /* orders grid */
+        .orders {
+          margin-top: 16px;
+          display: grid;
+          gap: 16px;
+        }
 
         .order-card {
-            background: white;
-            padding: 18px;
-            margin-bottom: 18px;
-            border-radius: 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+          background: var(--card);
+          border-radius: var(--radius);
+          padding: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          box-shadow: var(--shadow2);
+          backdrop-filter: blur(10px);
+          animation: pop 0.25s ease-out;
         }
 
-        .order-top {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 12px;
+        @keyframes pop {
+          from { opacity: 0; transform: translateY(10px) scale(0.99); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .order-id {
-            font-weight: bold;
-            color: #1b5e20;
-            font-size: 18px;
+        .order-head {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 10px;
+        }
+
+        .order-date {
+          font-size: 14px;
+          color: #111827;
+          font-weight: 900;
+        }
+
+        .order-sub {
+          font-size: 13px;
+          color: var(--muted);
+          margin-top: 3px;
         }
 
         .status {
-            font-weight: bold;
-            padding: 6px 14px;
-            border-radius: 20px;
-            background: #c8e6c9;
-            color: #1b5e20;
-            font-size: 14px;
+          font-weight: 900;
+          padding: 7px 14px;
+          border-radius: 999px;
+          font-size: 13px;
+          background: rgba(46, 125, 50, 0.14);
+          color: #1b5e20;
+          border: 1px solid rgba(46, 125, 50, 0.18);
+          height: fit-content;
+          white-space: nowrap;
         }
 
+        /* items */
         .items {
-            margin-top: 10px;
-            border-top: 1px solid #ddd;
-            padding-top: 12px;
+          margin-top: 10px;
+          padding-top: 12px;
+          border-top: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .items h3 {
+          font-size: 14px;
+          color: #0b2e22;
+          font-weight: 900;
+          margin-bottom: 8px;
         }
 
         .item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #ddd;
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 10px 0;
+          border-bottom: 1px dashed rgba(0,0,0,0.15);
         }
 
-        .item:last-child { border-bottom: none; }
-
-        .total {
-            text-align: right;
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
-            color: #2e7d32;
+        .item:last-child {
+          border-bottom: none;
         }
 
+        .item-left {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .item-left strong {
+          font-size: 14px;
+          color: #111827;
+        }
+
+        .item-left span {
+          font-size: 13px;
+          color: var(--muted);
+          font-weight: 700;
+        }
+
+        .item-right {
+          font-size: 14px;
+          font-weight: 900;
+          color: #111827;
+          white-space: nowrap;
+        }
+
+        /* address */
         .address {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #444;
-            background: #f1f8e9;
-            padding: 12px;
-            border-radius: 12px;
+          margin-top: 12px;
+          padding: 12px;
+          border-radius: 16px;
+          background: rgba(46, 125, 50, 0.08);
+          border: 1px solid rgba(46, 125, 50, 0.12);
+          font-size: 13px;
+          line-height: 1.45;
+          color: #111827;
         }
 
-        .empty-orders {
-            text-align: center;
-            font-size: 22px;
-            color: #555;
-            margin-top: 60px;
+        .address strong {
+          display: block;
+          margin-bottom: 6px;
+          font-size: 13px;
+          color: #0b2e22;
+        }
+
+        /* totals */
+        .total {
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid rgba(0,0,0,0.08);
+          text-align: right;
+          font-size: 14px;
+          color: #111827;
+          font-weight: 800;
+          line-height: 1.6;
+        }
+
+        .total .grand {
+          font-size: 16px;
+          font-weight: 1000;
+          color: #0b2e22;
+        }
+
+        /* empty state */
+        .empty {
+          margin-top: 60px;
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: var(--radius);
+          padding: 26px;
+          text-align: center;
+          box-shadow: var(--shadow2);
+          border: 1px solid rgba(255,255,255,0.35);
+        }
+
+        .empty h2 {
+          font-size: 20px;
+          font-weight: 1000;
+          color: #0b2e22;
+        }
+
+        .empty p {
+          margin-top: 6px;
+          color: var(--muted);
+          font-weight: 700;
+          font-size: 14px;
+        }
+
+        /* responsive */
+        @media (max-width: 520px) {
+          body { padding: 14px; }
+          .order-card { padding: 14px; }
+          .btn { padding: 9px 12px; font-size: 13px; }
+          .total { text-align: left; }
         }
     </style>
 </head>
 
 <body>
+<div class="blob one"></div>
+<div class="blob two"></div>
 
-<h1>My Orders</h1>
+<div class="container">
 
-<div class="header-buttons">
-    <a href="landing.html">Home</a>
-    <a href="cart.html">My Cart</a>
+    <div class="topbar">
+        <div class="title-wrap">
+            <h1>📦 My Orders</h1>
+            <p>Recent to oldest order history</p>
+        </div>
+
+        <div class="actions">
+            <a class="btn" href="landing.html">🏠 Home</a>
+            <a class="btn primary" href="cart.html">🛒 My Cart</a>
+        </div>
+    </div>
+
+    <div id="ordersContainer" class="orders"></div>
 </div>
 
-<div id="ordersContainer"></div>
+
+<script th:inline="javascript">
+    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
+</script>
 
 <script>
     const userId = Number(localStorage.getItem("userId"));
     const ordersContainer = document.getElementById("ordersContainer");
 
     function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleString();
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    }
+
+    function safeMoney(val) {
+      const num = Number(val || 0);
+      return num.toFixed(2);
     }
 
     async function loadOrders() {
-        const res = await fetch(`http://localhost:8083/orders/user/${userId}`);
+      try {
+        const res = await fetch(`${BACKEND_URL}/orders/user/${userId}`);
 
         if (!res.ok) {
-            ordersContainer.innerHTML = `<div class="empty-orders">⚠ Unable to load orders</div>`;
-            return;
+          ordersContainer.innerHTML = `
+            <div class="empty">
+              <h2>⚠ Unable to load orders</h2>
+              <p>Please try again after some time.</p>
+            </div>
+          `;
+          return;
         }
 
-        const orders = await res.json();
+        let orders = await res.json();
 
         if (!orders || orders.length === 0) {
-            ordersContainer.innerHTML = `<div class="empty-orders">📦 No orders found</div>`;
-            return;
+          ordersContainer.innerHTML = `
+            <div class="empty">
+              <h2>📦 No orders found</h2>
+              <p>Once you place an order, it will show here.</p>
+            </div>
+          `;
+          return;
         }
+
+        // ✅ Recent -> Oldest
+        // If backend already returns newest first, this will still work.
+        orders = orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
 
         ordersContainer.innerHTML = "";
 
-        orders.reverse().forEach(order => {
-            const itemsHtml = order.items.map(it => `
-                <div class="item">
-                    <div>
-                        <strong>${it.productName}</strong><br>
-                        ₹ ${it.price} × ${it.quantity}
-                    </div>
-                    <div>
-                        ₹ ${it.price * it.quantity}
-                    </div>
+        orders.forEach(order => {
+          const itemsHtml = (order.items || []).map(it => `
+            <div class="item">
+              <div class="item-left">
+                <strong>${it.productName || "Product"}</strong>
+                <span>₹ ${it.price} × ${it.quantity}</span>
+              </div>
+              <div class="item-right">
+                ₹ ${(Number(it.price || 0) * Number(it.quantity || 0)).toFixed(2)}
+              </div>
+            </div>
+          `).join("");
+
+          const addr = order.address || {};
+          const addressHtml = `
+            <div class="address">
+              <strong>📍 Delivery Address</strong>
+              ${addr.fullName || ""}<br>
+              ${addr.house || ""}${addr.street ? ", " + addr.street : ""}<br>
+              ${addr.city || ""}${addr.state ? ", " + addr.state : ""}${addr.pincode ? " - " + addr.pincode : ""}<br>
+              ${addr.phone ? "📞 " + addr.phone : ""}
+            </div>
+          `;
+
+          const shippingFee = Number(order.shippingFee || 0);
+          const totalAmount = Number(order.totalAmount || 0);
+          const cartTotal = totalAmount - shippingFee;
+
+          ordersContainer.innerHTML += `
+            <div class="order-card">
+              <div class="order-head">
+                <div>
+                  <div class="order-date">🕒 ${formatDate(order.orderDate)}</div>
+                  <div class="order-sub">Payment: <strong>Paid</strong></div>
                 </div>
-            `).join("");
+                <div class="status">${order.status || "PLACED"}</div>
+              </div>
 
-            // Address
-            const addr = order.address || {};
-            const addressHtml = `
-                <div class="address">
-                    <strong>Delivery Address</strong><br>
-                    ${addr.fullName || ""}<br>
-                    ${addr.house || ""}, ${addr.street || ""}<br>
-                    ${addr.city || ""}, ${addr.state || ""} - ${addr.pincode || ""}<br>
-                    📞 ${addr.phone || ""}
-                </div>
-            `;
+              <div class="items">
+                <h3>🧺 Items</h3>
+                ${itemsHtml}
+              </div>
 
-            ordersContainer.innerHTML += `
-                <div class="order-card">
-                    <div class="order-top">
-                        <div class="order-id">Order #${order.id}</div>
-                        <div class="status">${order.status}</div>
-                    </div>
+              ${addressHtml}
 
-                    <div><strong>Ordered On:</strong> ${formatDate(order.orderDate)}</div>
-
-                    <div class="items">
-                        <strong>Items</strong>
-                        ${itemsHtml}
-                    </div>
-
-                    ${addressHtml}
-
-                    <div class="total">
-                         Cart Total: ₹ ${(order.totalAmount - (order.shippingFee || 0)).toFixed(2)} <br>
-                        Shipping Fee: ₹ ${(order.shippingFee || 0).toFixed(2)} <br><br>
-                        Total Paid: ₹ ${order.totalAmount.toFixed(2)}
-                    </div>
-                </div>
-            `;
+              <div class="total">
+                Cart Total: ₹ ${safeMoney(cartTotal)} <br>
+                Shipping Fee: ₹ ${safeMoney(shippingFee)} <br>
+                <span class="grand">Total Paid: ₹ ${safeMoney(totalAmount)}</span>
+              </div>
+            </div>
+          `;
         });
+
+      } catch (err) {
+        console.error(err);
+        ordersContainer.innerHTML = `
+          <div class="empty">
+            <h2>❌ Server error</h2>
+            <p>Please try again.</p>
+          </div>
+        `;
+      }
     }
 
     loadOrders();

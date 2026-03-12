@@ -13,4 +13,6 @@ public class CartItemDto {
     private double price;
     private double subtotal;
     private ProductDto product;
+
+    private int stock;
 }

@@ -29,7 +29,7 @@ public class Product {
     @Column(nullable = false)
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "user_id")//owning side
     private User user;

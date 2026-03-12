@@ -1,113 +1,281 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Agri Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
+        :root {
+          --bg1: #0f3d2e;
+          --bg2: #4caf50;
+
+          --card: rgba(255, 255, 255, 0.92);
+          --text: #1f2937;
+          --muted: #6b7280;
+
+          --green: #2e7d32;
+          --green2: #43a047;
+
+          --danger: #b71c1c;
+          --dangerBg: #ffebee;
+
+          --success: #1b5e20;
+          --successBg: #e8f5e9;
+
+          --shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+          --shadow2: 0 10px 30px rgba(0, 0, 0, 0.18);
+
+          --radius: 18px;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Segoe UI", system-ui, Arial, sans-serif;
+        }
+
         body {
-            margin: 0;
-            font-family: Arial;
-            background: linear-gradient(135deg, #0f3d2e, #4caf50);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 18px;
+          color: var(--text);
+
+          background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 55%),
+                      radial-gradient(circle at 80% 30%, rgba(255,255,255,0.15), transparent 55%),
+                      linear-gradient(135deg, var(--bg1), var(--bg2));
+          overflow-x: hidden;
         }
 
+        /* Subtle floating blobs (premium look) */
+        .blob {
+          position: fixed;
+          width: 260px;
+          height: 260px;
+          border-radius: 50%;
+          filter: blur(35px);
+          opacity: 0.35;
+          z-index: 0;
+          pointer-events: none;
+          animation: float 7s ease-in-out infinite;
+        }
+
+        .blob.one {
+          background: rgba(67, 160, 71, 0.9);
+          top: -60px;
+          left: -60px;
+        }
+
+        .blob.two {
+          background: rgba(255, 255, 255, 0.75);
+          bottom: -80px;
+          right: -80px;
+          animation-delay: 1.2s;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(18px) translateX(12px); }
+        }
+
+        /* ===== CARD ===== */
         .card {
-            background: #ffffff;
-            width: 360px;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0px 5px 20px rgba(0,0,0,0.3);
+          width: min(420px, 100%);
+          background: var(--card);
+          border-radius: var(--radius);
+          padding: 22px;
+          box-shadow: var(--shadow);
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          backdrop-filter: blur(10px);
+          z-index: 2;
+          animation: pop 0.35s ease-out;
         }
 
-        h2 {
-            text-align: center;
-            color: #1b5e20;
-            margin-bottom: 20px;
+        @keyframes pop {
+          from { opacity: 0; transform: translateY(12px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .brand {
+          text-align: center;
+          margin-bottom: 18px;
+        }
+
+        .brand h2 {
+          font-size: clamp(20px, 2.2vw, 26px);
+          font-weight: 900;
+          color: #0b2e22;
+          letter-spacing: 0.2px;
+        }
+
+        .brand p {
+          margin-top: 6px;
+          font-size: 14px;
+          color: var(--muted);
+          line-height: 1.4;
+        }
+
+        /* ===== FORM ===== */
+        form {
+          margin-top: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .field label {
+          display: block;
+          font-size: 13px;
+          font-weight: 800;
+          color: #374151;
+          margin-bottom: 6px;
+        }
+
+        .input-wrap {
+          position: relative;
+        }
+
+        .input-wrap span {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 16px;
+          opacity: 0.75;
+          pointer-events: none;
         }
 
         input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            outline: none;
+          width: 100%;
+          padding: 12px 12px 12px 42px;
+          border-radius: 14px;
+          border: 1px solid rgba(0, 0, 0, 0.16);
+          outline: none;
+          font-size: 14px;
+          background: rgba(255, 255, 255, 0.8);
+          transition: 0.2s ease;
         }
 
         input:focus {
-            border: 1px solid #2e7d32;
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+          border-color: rgba(67, 160, 71, 0.85);
+          box-shadow: 0 0 0 4px rgba(67, 160, 71, 0.18);
+          background: white;
         }
 
+        /* ===== BUTTON ===== */
         button {
-            width: 100%;
-            background: #2e7d32;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
+          width: 100%;
+          border: none;
+          border-radius: 14px;
+          padding: 12px 16px;
+          cursor: pointer;
+          font-size: 15px;
+          font-weight: 900;
+          color: white;
+
+          background: linear-gradient(135deg, var(--green2), var(--green));
+          box-shadow: 0 14px 24px rgba(67, 160, 71, 0.22);
+          transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.2s ease;
         }
 
         button:hover {
-            background: #1b5e20;
+          filter: brightness(1.03);
+          box-shadow: 0 18px 28px rgba(67, 160, 71, 0.28);
         }
 
-        .signup-link {
-            margin-top: 14px;
-            text-align: center;
-            font-size: 14px;
+        button:active {
+          transform: scale(0.98);
         }
 
-        .signup-link a {
-            color: #1b5e20;
-            font-weight: bold;
-            text-decoration: none;
+        button:disabled {
+          opacity: 0.75;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
         }
 
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
-
-        /* MESSAGE BOX */
+        /* ===== MESSAGE BOX ===== */
         .message-box {
-            margin-top: 14px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: center;
-            display: none;
+          margin-top: 6px;
+          padding: 12px;
+          border-radius: 14px;
+          font-size: 14px;
+          text-align: center;
+          display: none;
+          font-weight: 800;
+          line-height: 1.4;
         }
 
         .message-success {
-            background: #e8f5e9;
-            color: #1b5e20;
-            border: 1px solid #a5d6a7;
+          background: var(--successBg);
+          color: var(--success);
+          border: 1px solid rgba(27, 94, 32, 0.25);
         }
 
         .message-error {
-            background: #ffebee;
-            color: #b71c1c;
-            border: 1px solid #ef9a9a;
+          background: var(--dangerBg);
+          color: var(--danger);
+          border: 1px solid rgba(183, 28, 28, 0.25);
+        }
+
+        /* ===== FOOTER LINKS ===== */
+        .signup-link {
+          margin-top: 14px;
+          text-align: center;
+          font-size: 14px;
+          color: #374151;
+        }
+
+        .signup-link a {
+          color: #0b3d22;
+          font-weight: 900;
+          text-decoration: none;
+        }
+
+        .signup-link a:hover {
+          text-decoration: underline;
+        }
+
+        /* Small phones */
+        @media (max-width: 360px) {
+          .card {
+            padding: 18px;
+          }
         }
     </style>
 </head>
 
 <body>
 
+<!-- background blobs -->
+<div class="blob one"></div>
+<div class="blob two"></div>
+
 <div class="card">
-    <h2>🌱 Agri Login</h2>
+    <div class="brand">
+        <h2>🌱 Agri Login</h2>
+        <p>Login to continue shopping fresh farm products.</p>
+    </div>
 
     <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
+        <div class="field">
+            <label for="username">Username</label>
+            <div class="input-wrap">
+                <span>👤</span>
+                <input type="text" id="username" placeholder="Enter your username" required />
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+                <span>🔒</span>
+                <input type="password" id="password" placeholder="Enter your password" required />
+            </div>
+        </div>
 
         <button type="submit" id="loginBtn">Login</button>
 
@@ -120,6 +288,11 @@
     </div>
 </div>
 
+
+<script th:inline="javascript">
+    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
+</script>
+
 <script>
     const form = document.getElementById("loginForm");
     const usernameInput = document.getElementById("username");
@@ -129,88 +302,84 @@
     const loginBtn = document.getElementById("loginBtn");
 
     function showMessage(message, type) {
-        messageBox.style.display = "block";
-        messageBox.classList.remove("message-success", "message-error");
+      messageBox.style.display = "block";
+      messageBox.classList.remove("message-success", "message-error");
 
-        if (type === "success") {
-            messageBox.classList.add("message-success");
-        } else {
-            messageBox.classList.add("message-error");
-        }
+      if (type === "success") {
+        messageBox.classList.add("message-success");
+      } else {
+        messageBox.classList.add("message-error");
+      }
 
-        messageBox.textContent = message;
+      messageBox.textContent = message;
     }
 
     function clearMessage() {
-        messageBox.style.display = "none";
-        messageBox.textContent = "";
-        messageBox.classList.remove("message-success", "message-error");
+      messageBox.style.display = "none";
+      messageBox.textContent = "";
+      messageBox.classList.remove("message-success", "message-error");
     }
 
     form.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        clearMessage();
+      e.preventDefault();
+      clearMessage();
 
-        const payload = {
-            username: usernameInput.value.trim(),
-            password: passwordInput.value
-        };
+      const payload = {
+        username: usernameInput.value.trim(),
+        password: passwordInput.value
+      };
 
-        // Basic frontend validation
-        if (!payload.username || !payload.password) {
-            showMessage("Please enter username and password.", "error");
-            return;
-        }
+      if (!payload.username || !payload.password) {
+        showMessage("Please enter username and password.", "error");
+        return;
+      }
 
-        // Disable button while logging in
-        loginBtn.disabled = true;
-        loginBtn.textContent = "Logging in...";
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
 
-        try {
-            const response = await fetch("http://localhost:8083/api/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
 
-            if (response.ok) {
-                const data = await response.json();
+        if (response.ok) {
+          const data = await response.json();
 
-                localStorage.setItem("loggedInUser", data.username);
-                localStorage.setItem("userRole", data.role);
-                localStorage.setItem("userId", data.userId);
-                localStorage.setItem("token", data.jwt);
+          localStorage.setItem("loggedInUser", data.username);
+          localStorage.setItem("userRole", data.role);
+          localStorage.setItem("userId", data.userId);
+          localStorage.setItem("token", data.jwt);
 
-                showMessage("✅ Login successful! Redirecting...", "success");
+          showMessage("✅ Login successful! Redirecting...", "success");
 
-                setTimeout(() => {
-                    window.location.href = "landing.html";
-                }, 1200);
+          setTimeout(() => {
+            window.location.href = "landing.html";
+          }, 1200);
 
-            } else {
-                let errorMsg = "Invalid username or password.";
+        } else {
+          let errorMsg = "Invalid username or password.";
 
-                try {
-                    const errorData = await response.json();
-                    if (errorData.message) {
-                        errorMsg = errorData.message;
-                    }
-                } catch (e) {
-                    // ignore if backend didn't return JSON
-                }
-
-                showMessage("❌ " + errorMsg, "error");
+          try {
+            const errorData = await response.json();
+            if (errorData.message) {
+              errorMsg = errorData.message;
             }
+          } catch (e) {}
 
-        } catch (err) {
-            console.error("Login failed:", err);
-            showMessage("❌ Server error. Please try again.", "error");
-        } finally {
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
+          showMessage("❌ " + errorMsg, "error");
         }
+
+      } catch (err) {
+        console.error("Login failed:", err);
+        showMessage("❌ Server error. Please try again.", "error");
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
     });
 </script>
 

@@ -31,12 +31,19 @@ public class AuthUtil {
     }
 
     public String getUsernameFromToken(String header){
-        Claims claims=Jwts.parser()
+        return extractAllClaims(header).getSubject();
+    }
+
+    public Long getUserIdFromToken(String token){
+        Claims claims=extractAllClaims(token);
+        return Long.parseLong(claims.get("userId",String.class));
+    }
+
+    private Claims extractAllClaims(String token){
+        return Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
-                .parseSignedClaims(header)
+                .parseSignedClaims(token)
                 .getPayload();
-
-        return claims.getSubject();
     }
 }

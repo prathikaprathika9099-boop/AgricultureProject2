@@ -16,9 +16,6 @@ public interface CartItemRepository extends JpaRepository<CartItem,Long> {
 
     void deleteByProductId(Long id);
 
-    @Query("SELECT SUM(ci.subtotal) FROM CartItem ci WHERE ci.cart.id = :cartId")
-    double sumSubtotalByCartId(@Param("cartId") Long cartId);
-
 
 
     @Modifying

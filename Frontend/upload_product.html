@@ -1,104 +1,304 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>AgriBazaar | Upload Product</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
-        /* Existing Styles */
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1b5e20, #66bb6a);
-            font-family: Arial, sans-serif;
-            padding: 30px;
+        :root{
+          --bg1:#0f3d1c;
+          --bg2:#3e9f57;
+          --card:rgba(255,255,255,0.92);
+          --text:#12351c;
+          --muted:#4b5563;
+          --green:#2e7d32;
+          --green2:#1b5e20;
+          --danger:#b71c1c;
+          --radius:18px;
+          --shadow:0 18px 50px rgba(0,0,0,0.25);
         }
 
-        .container {
-            max-width: 1000px;
-            margin: auto;
+        *{ box-sizing:border-box; }
+
+        body{
+          margin:0;
+          min-height:100vh;
+          font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+          background:
+            radial-gradient(1000px 700px at 20% 10%, rgba(255,255,255,0.12), transparent 60%),
+            linear-gradient(135deg, var(--bg1), var(--bg2));
+          padding:18px;
+          color:white;
         }
 
-        .card {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        .container{
+          width:100%;
+          max-width:1100px;
+          margin:0 auto;
+          display:grid;
+          gap:18px;
         }
 
-        h2 {
-            text-align: center;
-            color: #1b5e20;
-            margin-bottom: 20px;
+        .topbar{
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:12px;
+          flex-wrap:wrap;
         }
 
-        input, button {
-            width: 100%;
-            margin-top: 12px;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 14px;
+        .brand{
+          display:flex;
+          flex-direction:column;
+          gap:4px;
         }
 
-        button {
-            background: #1b5e20;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
+        .brand h1{
+          margin:0;
+          font-size:clamp(20px, 2.6vw, 28px);
+          font-weight:900;
+          letter-spacing:0.2px;
         }
 
-        button:hover {
-            background: #145a17;
+        .brand p{
+          margin:0;
+          opacity:0.9;
+          font-size:14px;
         }
 
-        .result {
-            margin-top: 10px;
-            text-align: center;
-            font-size: 14px;
-            color: green;
+        .nav{
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
         }
 
-        .products {
-            margin-top: 30px;
+        .nav a{
+          text-decoration:none;
+          background:rgba(255,255,255,0.16);
+          color:white;
+          padding:10px 14px;
+          border-radius:14px;
+          border:1px solid rgba(255,255,255,0.25);
+          font-weight:800;
+          font-size:14px;
+          transition:0.2s ease;
+          backdrop-filter: blur(10px);
         }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+        .nav a:hover{
+          background:rgba(255,255,255,0.24);
+          transform:translateY(-1px);
         }
 
-        .product-card {
-            background: white;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-            text-align: center;
+        /* Layout: form + products */
+        .layout{
+          display:grid;
+          gap:18px;
         }
 
-        .product-card img {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            border-radius: 8px;
+        @media(min-width: 920px){
+          .layout{
+            grid-template-columns: 380px 1fr;
+            align-items:start;
+          }
         }
 
-        .product-card h4 {
-            margin: 8px 0 4px;
-            color: #1b5e20;
+        .card{
+          background:var(--card);
+          border-radius:var(--radius);
+          box-shadow:var(--shadow);
+          border:1px solid rgba(255,255,255,0.35);
+          backdrop-filter: blur(10px);
+          padding:18px;
+          color:var(--text);
         }
 
-        .product-card p {
-            margin: 2px 0;
-            font-size: 13px;
+        .card h2{
+          margin:0 0 14px;
+          font-size:18px;
+          font-weight:900;
+          text-align:center;
+          color:var(--text);
         }
 
-        .price {
-            font-weight: bold;
-            color: #2e7d32;
+        label{
+          display:block;
+          margin:0 0 6px;
+          font-size:13px;
+          font-weight:800;
+          color:var(--muted);
+        }
+
+        input, textarea{
+          width:100%;
+          padding:12px 12px;
+          border-radius:14px;
+          border:1px solid rgba(0,0,0,0.12);
+          outline:none;
+          font-size:15px;
+          background:rgba(255,255,255,0.95);
+          transition:0.2s ease;
+        }
+
+        input:focus, textarea:focus{
+          border-color: rgba(46,125,50,0.7);
+          box-shadow: 0 0 0 4px rgba(46,125,50,0.16);
+        }
+
+        .form-grid{
+          display:grid;
+          gap:12px;
+        }
+
+        .two-col{
+          display:grid;
+          gap:12px;
+        }
+
+        @media(min-width: 520px){
+          .two-col{
+            grid-template-columns:1fr 1fr;
+          }
+        }
+
+        .hint{
+          margin-top:4px;
+          font-size:12px;
+          color:var(--muted);
+        }
+
+        button{
+          width:100%;
+          padding:12px;
+          border:none;
+          border-radius:14px;
+          cursor:pointer;
+          font-size:16px;
+          font-weight:900;
+          background:linear-gradient(135deg, var(--green), var(--green2));
+          color:white;
+          transition: transform 0.08s ease, filter 0.2s ease;
+        }
+
+        button:hover{ filter:brightness(1.05); }
+        button:active{ transform:scale(0.99); }
+        button:disabled{ opacity:0.65; cursor:not-allowed; }
+
+        /* message */
+        .message{
+          display:none;
+          margin-top:12px;
+          padding:10px 12px;
+          border-radius:14px;
+          font-size:14px;
+          text-align:center;
+          font-weight:800;
+        }
+
+        .success{
+          display:block;
+          background:#e8f5e9;
+          color:#1b5e20;
+          border:1px solid #a5d6a7;
+        }
+
+        .error{
+          display:block;
+          background:#ffebee;
+          color:var(--danger);
+          border:1px solid #ef9a9a;
+        }
+
+        /* Products */
+        .section-title{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+          margin-bottom:10px;
+          flex-wrap:wrap;
+        }
+
+        .section-title h2{
+          margin:0;
+          font-size:18px;
+          font-weight:900;
+          color:white;
+        }
+
+        .small-note{
+          font-size:13px;
+          opacity:0.9;
+        }
+
+        .product-grid{
+          display:grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap:14px;
+        }
+
+        .product-card{
+          background:rgba(255,255,255,0.92);
+          border-radius:18px;
+          padding:12px;
+          box-shadow:0 10px 25px rgba(0,0,0,0.20);
+          border:1px solid rgba(255,255,255,0.35);
+          color:var(--text);
+          overflow:hidden;
+        }
+
+        .product-card img{
+          width:100%;
+          height:160px;
+          object-fit:cover;
+          border-radius:14px;
+          display:block;
+          background:#f3f4f6;
+        }
+
+        .product-name{
+          margin:10px 0 4px;
+          font-weight:900;
+          color:var(--green2);
+          font-size:16px;
+          line-height:1.2;
+        }
+
+        .product-desc{
+          margin:0 0 8px;
+          font-size:13px;
+          color:#374151;
+          line-height:1.3;
+        }
+
+        .meta{
+          display:flex;
+          justify-content:space-between;
+          gap:10px;
+          align-items:center;
+          flex-wrap:wrap;
+          margin-top:8px;
+        }
+
+        .pill{
+          font-weight:900;
+          font-size:13px;
+          padding:6px 10px;
+          border-radius:999px;
+          background:rgba(46,125,50,0.12);
+          color:var(--green2);
+          border:1px solid rgba(46,125,50,0.25);
+        }
+
+        .empty{
+          text-align:center;
+          padding:26px 14px;
+          border-radius:18px;
+          background:rgba(255,255,255,0.12);
+          border:1px solid rgba(255,255,255,0.20);
+          font-weight:800;
+          color:white;
         }
     </style>
 </head>
@@ -107,126 +307,242 @@
 
 <div class="container">
 
-    <!-- Upload Product -->
-    <div class="card">
-        <h2>Upload Product 🌾</h2>
+    <div class="topbar">
+        <div class="brand">
+            <h1>🌾 AgriBazaar</h1>
+            <p>Upload your products and manage them easily</p>
+        </div>
 
-        <input type="text" id="name" placeholder="Product Name" required>
-        <input type="number" id="cost" placeholder="Cost" required>
-        <input type="number" id="stock" placeholder="Stock Available" required>
-        <input type="text" id="description" placeholder="Description" required>
-        <input type="file" id="image" accept="image/*" required>
-
-        <button onclick="uploadProduct()">Upload</button>
-        <div class="result" id="result"></div>
+        <div class="nav">
+            <a href="landing.html">Home</a>
+            <a href="products.html">All Products</a>
+            <a href="order_history.html">My Orders</a>
+        </div>
     </div>
 
-    <!-- Product List -->
-    <div class="products">
-        <h2 style="color:white; text-align:center;">My Uploaded Products</h2>
-        <div class="product-grid" id="productGrid"></div>
-    </div>
+    <div class="layout">
 
+        <!-- Upload Product -->
+        <div class="card">
+            <h2>Upload Product</h2>
+
+            <form id="uploadForm" class="form-grid">
+
+                <div>
+                    <label for="name">Product Name</label>
+                    <input type="text" id="name" placeholder="Eg: Fresh Tomatoes" required />
+                </div>
+
+                <div class="two-col">
+                    <div>
+                        <label for="cost">Cost (₹)</label>
+                        <input type="number" id="cost" placeholder="Eg: 40" min="1" required />
+                    </div>
+
+                    <div>
+                        <label for="stock">Stock</label>
+                        <input type="number" id="stock" placeholder="Eg: 10" min="1" required />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="description">Description (Optional)</label>
+                    <input type="text" id="description" placeholder="Eg: Farm fresh, organic, best quality" />
+                    <div class="hint">You can leave it empty.</div>
+                </div>
+
+                <div>
+                    <label for="image">Product Image</label>
+                    <input type="file" id="image" accept="image/*" required />
+                </div>
+
+                <button type="submit" id="uploadBtn">Upload</button>
+
+                <div id="result" class="message"></div>
+            </form>
+        </div>
+
+        <!-- Product List -->
+        <div>
+            <div class="section-title">
+                <h2>My Uploaded Products</h2>
+                <div class="small-note" id="countText"></div>
+            </div>
+
+            <div class="product-grid" id="productGrid"></div>
+            <div id="emptyBox" class="empty" style="display:none;">No products uploaded yet</div>
+        </div>
+
+    </div>
 </div>
 
+<script th:inline="javascript">
+    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
+</script>
+
 <script>
-    // 🔑 Get logged-in userId
     const userId = Number(localStorage.getItem("userId"));
 
     if (!userId) {
-        alert("User not logged in");
-        window.location.href = "login.html";
+      alert("User not logged in");
+      window.location.href = "login.html";
     }
 
-    // Upload product (NO reload after upload)
-    function uploadProduct() {
-        const name = document.getElementById("name").value;
-        const cost = document.getElementById("cost").value;
-        const stock = document.getElementById("stock").value;
-        const description = document.getElementById("description").value;
-        const image = document.getElementById("image").files[0];
+    const form = document.getElementById("uploadForm");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const resultBox = document.getElementById("result");
+    const productGrid = document.getElementById("productGrid");
+    const emptyBox = document.getElementById("emptyBox");
+    const countText = document.getElementById("countText");
 
-        if (!name || !cost || !stock || !description || !image) {
-            alert("Fill all fields");
-            return;
+    function showMessage(text, ok) {
+      resultBox.className = "message " + (ok ? "success" : "error");
+      resultBox.textContent = text;
+      resultBox.style.display = "block";
+    }
+
+    function clearMessage() {
+      resultBox.style.display = "none";
+      resultBox.textContent = "";
+      resultBox.className = "message";
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderProducts(products) {
+      productGrid.innerHTML = "";
+
+      if (!products || products.length === 0) {
+        emptyBox.style.display = "block";
+        countText.textContent = "";
+        return;
+      }
+
+      emptyBox.style.display = "none";
+      countText.textContent = `${products.length} product(s)`;
+
+      products.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        const img = document.createElement("img");
+        img.loading = "lazy";
+        img.src = BACKEND_URL + p.imageUrl;
+        img.alt = p.name || "Product";
+        img.onerror = () => img.src = "default.png";
+
+        const name = document.createElement("div");
+        name.className = "product-name";
+        name.textContent = p.name || "Unnamed";
+
+        const desc = document.createElement("div");
+        desc.className = "product-desc";
+        desc.textContent = p.description ? p.description : "No description";
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        const price = document.createElement("div");
+        price.className = "pill";
+        price.textContent = `₹ ${p.cost}`;
+
+        const stock = document.createElement("div");
+        stock.className = "pill";
+        stock.textContent = `Stock: ${p.stock}`;
+
+        meta.appendChild(price);
+        meta.appendChild(stock);
+
+        card.appendChild(img);
+        card.appendChild(name);
+        card.appendChild(desc);
+        card.appendChild(meta);
+
+        productGrid.appendChild(card);
+      });
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(`${BACKEND_URL}/get/product?userId=${userId}`);
+        const products = await res.json();
+        renderProducts(products);
+      } catch (err) {
+        console.error(err);
+        emptyBox.style.display = "block";
+        emptyBox.textContent = "⚠ Failed to load products";
+      }
+    }
+
+    /* ✅ Upload product + instantly show it after upload */
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMessage();
+
+      const name = document.getElementById("name").value.trim();
+      const cost = document.getElementById("cost").value;
+      const stock = document.getElementById("stock").value;
+      const description = document.getElementById("description").value.trim();
+      const image = document.getElementById("image").files[0];
+
+      if (!name || !cost || !stock || !image) {
+        showMessage("❌ Please fill required fields (name, cost, stock, image).", false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("cost", cost);
+      formData.append("stock", stock);
+
+      // ✅ Description optional
+      formData.append("description", description ? description : "");
+
+      formData.append("image", image);
+      formData.append("userId", userId);
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "Uploading...";
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/upload/image`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!res.ok) {
+          throw new Error(await res.text());
         }
 
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("cost", cost);
-        formData.append("stock", stock);
-        formData.append("description", description);
-        formData.append("image", image);
-        formData.append("userId", userId);
+        showMessage("✅ Product uploaded successfully!", true);
 
-        fetch("http://localhost:8083/upload/image", {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.json())
-        .then(() => {
-            document.getElementById("result").innerText =
-                "Product uploaded successfully ✅";
+        // Clear fields
+        document.getElementById("name").value = "";
+        document.getElementById("cost").value = "";
+        document.getElementById("stock").value = "";
+        document.getElementById("description").value = "";
+        document.getElementById("image").value = "";
 
-            document.getElementById("name").value = "";
-            document.getElementById("cost").value = "";
-            document.getElementById("stock").value = "";
-            document.getElementById("description").value = "";
-            document.getElementById("image").value = "";
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Upload failed ❌");
-        });
-    }
+        // ✅ Reload products immediately (so it shows instantly)
+        await loadProducts();
 
-    // Load products ONCE when page opens
-    function loadProducts() {
-    fetch(`http://localhost:8083/get/product?userId=${userId}`)
-        .then(res => res.json())
-        .then(products => {
-            const grid = document.getElementById("productGrid");
-            grid.innerHTML = "";
+      } catch (err) {
+        console.error(err);
+        showMessage("❌ Upload failed. Try again.", false);
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = "Upload";
+      }
+    });
 
-            if (!products || products.length === 0) {
-                grid.innerHTML =
-                    "<p style='color:white; text-align:center;'>No products uploaded yet</p>";
-                return;
-            }
-
-            products.forEach(p => {
-                const card = document.createElement("div");
-                card.className = "product-card";
-
-                const img = document.createElement("img");
-                img.loading = "lazy";
-                img.src = "http://localhost:8083" + p.imageUrl;
-                img.alt = p.name;
-                img.onerror = () => img.src = 'default.png';
-                card.appendChild(img);
-
-
-                const h4 = document.createElement("h4");
-                h4.textContent = p.name;
-                card.appendChild(h4);
-
-                const desc = document.createElement("p");
-                desc.textContent = p.description;
-                card.appendChild(desc);
-
-                const price = document.createElement("p");
-                price.className = "price";
-                price.textContent = `₹ ${p.cost}`;
-                card.appendChild(price);
-
-                grid.appendChild(card);
-            });
-        })
-        .catch(err => console.error(err));
-}
-
-
-    // 🔥 Load on page entry
     window.addEventListener("DOMContentLoaded", loadProducts);
 </script>
 

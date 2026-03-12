@@ -20,7 +20,7 @@ public class OrderController {
 
     @GetMapping("/orders/user/{userId}")//for history page
     public List<Order> getUserOrders(@PathVariable Long userId) {
-        return orderRepository.findByUserIdOrderByOrderDateDesc(userId);
+        return orderRepository.findOrdersWithItems(userId);
     }
 
     @GetMapping("/orders/unprinted")

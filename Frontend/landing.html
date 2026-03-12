@@ -1,11 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>AgriBazaar</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
+        :root {
+            --green-1: #1b5e20;
+            --green-2: #2e7d32;
+            --green-3: #43a047;
+            --glass: rgba(255, 255, 255, 0.16);
+            --glass-2: rgba(255, 255, 255, 0.22);
+            --shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+            --radius-xl: 22px;
+            --radius-lg: 16px;
+            --hover-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -19,6 +31,9 @@
                 linear-gradient(rgba(0, 70, 25, 0.6), rgba(0, 70, 25, 0.6)),
                 url("farm.png") center/cover no-repeat fixed;
             color: white;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         /* ===== HEADER ===== */
@@ -31,35 +46,37 @@
             display: flex;
             justify-content: flex-end;
             z-index: 100;
-            backdrop-filter: blur(6px);
+            background: transparent;
+            backdrop-filter: none;
         }
 
         #authArea {
             display: flex;
             align-items: center;
+            gap: 12px;
         }
 
         header button {
             padding: 10px 22px;
-            border-radius: 25px;
+            border-radius: 999px;
             border: none;
-            background: #2e7d32;
+            background: var(--green-2);
             color: white;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.25s;
         }
 
         header button:hover {
-            background: #1b5e20;
+            background: var(--green-1);
             transform: translateY(-2px);
         }
 
         /* ===== PROFILE DROPDOWN ===== */
         .profile-wrapper {
             position: relative;
-            padding-bottom: 10px;
+            padding-bottom: 0px;
         }
 
         .profile-btn {
@@ -70,9 +87,15 @@
             font-weight: 600;
             padding: 10px 18px;
             border-radius: 25px;
-            background: rgba(255,255,255,0.18);
+            background: rgba(255, 255, 255, 0.18);
+            transition: 0.3s ease;
         }
 
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.26);
+        }
+
+        /* Dropdown */
         .profile-dropdown {
             position: absolute;
             top: 52px;
@@ -81,16 +104,26 @@
             color: #333;
             width: 220px;
             border-radius: 14px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            box-shadow: var(--shadow);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-8px);
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform: translateY(-6px);
+            transition: 0.25s ease;
             pointer-events: none;
+            padding: 6px 0;
         }
 
-        .profile-wrapper:hover .profile-dropdown,
-        .profile-dropdown:hover {
+        .profile-dropdown::before {
+            content: "";
+            position: absolute;
+            top: -12px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: transparent;
+        }
+
+        .profile-wrapper:hover .profile-dropdown {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
@@ -99,11 +132,12 @@
 
         .profile-dropdown a {
             display: block;
-            padding: 14px 18px;
+            padding: 13px 16px;
             text-decoration: none;
-            color: #333;
+            color: #222;
             font-size: 14px;
-            transition: background 0.3s;
+            font-weight: 600;
+            transition: 0.25s;
             cursor: pointer;
         }
 
@@ -113,104 +147,186 @@
 
         .profile-dropdown .logout {
             color: #c62828;
-            font-weight: bold;
+            font-weight: 800;
         }
 
         /* ===== HERO ===== */
         .hero {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
+            padding: 110px 18px 40px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out forwards;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
+            font-size: clamp(2.1rem, 4vw, 3.6rem);
+            margin-bottom: 14px;
+            line-height: 1.1;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
         }
 
         .hero p {
-            font-size: 1.25rem;
-            max-width: 680px;
-            margin-bottom: 40px;
-            line-height: 1.6;
+            font-size: clamp(1rem, 1.4vw, 1.25rem);
+            max-width: 720px;
+            margin-bottom: 28px;
+            line-height: 1.65;
+            opacity: 0.95;
         }
 
         .hero .cta {
-            padding: 15px 45px;
-            font-size: 18px;
-            border-radius: 30px;
+            padding: 14px 34px;
+            font-size: 16px;
+            font-weight: 800;
+            border-radius: 999px;
             border: none;
-            background: linear-gradient(135deg, #43a047, #2e7d32);
+            background: linear-gradient(135deg, var(--green-3), var(--green-2));
             color: white;
             cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .hero .cta:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
         }
 
         /* ===== SECTION ===== */
         .section {
-            padding: 100px 40px;
+            padding: 80px 18px;
             text-align: center;
         }
 
         .section h2 {
-            font-size: 2.8rem;
-            margin-bottom: 12px;
+            font-size: clamp(1.7rem, 3vw, 2.7rem);
+            margin-bottom: 10px;
         }
 
         .section p {
-            max-width: 780px;
+            max-width: 820px;
             margin: auto;
-            font-size: 1.1rem;
-            margin-bottom: 60px;
+            font-size: 1.05rem;
+            margin-bottom: 45px;
+            line-height: 1.6;
+            opacity: 0.95;
         }
 
         /* ===== PRODUCTS ===== */
         .product-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 30px;
-            max-width: 1100px;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 22px;
+            max-width: 1120px;
             margin: auto;
+            transition: transform 0.3s ease;
         }
 
         .product-card {
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(12px);
-            border-radius: 22px;
-            padding: 22px;
-            box-shadow: 0px 12px 35px rgba(0,0,0,0.35);
+            background: var(--glass);
+            backdrop-filter: blur(14px);
+            border-radius: var(--radius-xl);
+            padding: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: left;
+            transition: 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            background: var(--glass-2);
+            box-shadow: var(--hover-shadow);
         }
 
         .product-card img {
             width: 100%;
             height: 170px;
             object-fit: cover;
-            border-radius: 15px;
+            border-radius: 14px;
             margin-bottom: 12px;
+        }
+
+        .product-card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 6px;
         }
 
         .price {
             color: #b9ffb9;
-            font-weight: bold;
+            font-weight: 900;
             margin-bottom: 8px;
         }
 
+        .product-card p {
+            opacity: 0.95;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
         .see-all {
-            margin-top: 40px;
+            margin-top: 34px;
             display: inline-block;
-            color: #b9ffb9;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #d7ffd7;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
+            transition: 0.25s;
+        }
+
+        .see-all:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 0, 0, 0.25);
         }
 
         footer {
-            background: #0f3d2e;
+            background: rgba(15, 61, 46, 0.95);
             padding: 18px;
             text-align: center;
             color: #e0f2f1;
+            font-weight: 600;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 700px) {
+            header {
+                padding: 12px 14px;
+            }
+
+            .profile-dropdown {
+                width: 220px;
+            }
+
+            .section {
+                padding: 65px 14px;
+            }
+
+            .product-card img {
+                height: 160px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .profile-btn {
+                padding: 9px 12px;
+                font-size: 14px;
+            }
+
+            header button {
+                padding: 9px 16px;
+            }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
@@ -256,6 +372,10 @@
     © 2026 AgriBazaar | Grow Smart 🌿
 </footer>
 
+<script th:inline="javascript">
+    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
+</script>
+
 <script>
     function goToSignup() {
         window.location.href = "signup.html";
@@ -270,15 +390,23 @@
     }
 
     function goToAddressPage() {
-        window.location.href = "addresses.html";  // Redirect to the new address page
+        window.location.href = "addresses.html";
+    }
+
+    function goToAllProducts() {
+        window.location.href = "products.html";
+    }
+
+    function goToOrderHistory() {
+        window.location.href = "order_history.html";
     }
 
     function logout() {
-         localStorage.removeItem("loggedInUser");
-         localStorage.removeItem("userRole");
-         localStorage.removeItem("userId");
-         localStorage.removeItem("token");
-         location.reload();
+        localStorage.removeItem("loggedInUser");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("token");
+        location.reload();
     }
 
     function checkLogin() {
@@ -287,79 +415,103 @@
         const authArea = document.getElementById("authArea");
 
         if (!user) {
-            authArea.innerHTML =
-                `<button onclick="goToSignup()">Login / Signup</button>`;
+            authArea.innerHTML = `<button onclick="goToSignup()">Login / Signup</button>`;
             return;
         }
 
         let links = "";
 
-        if (role === "FARMER") {
-            links += `<a onclick="goToUpload()">📤 Upload Product</a>
-            <a onclick="downloadOrdersExcel()">📥 Download Orders Excel</a>
-            `;
-
-        }
-
+        // common links for all users
         links += `
+            <a onclick="goToAllProducts()">🛍️ All Products</a>
+            <a onclick="goToOrderHistory()">📦 Order History</a>
             <a onclick="goToAddressPage()">📍 Store Address</a>
             <a onclick="goToCart()">🛒 Cart</a>
-            <a class="logout" onclick="logout()">🚪 Logout</a>
         `;
 
+        // farmer-only links
+        if (role === "FARMER") {
+            links = `
+                <a onclick="goToUpload()">📤 Upload Product</a>
+                <a onclick="goToUnprintedOrders()">🖨️ Unpacked Orders</a>
+                <a onclick="downloadOrdersExcel()">📥 Download Orders Excel</a>
+            ` + links;
+        }
+
+        // logout always last
+        links += `<a class="logout" onclick="logout()">🚪 Logout</a>`;
+
         authArea.innerHTML = `
-            <div class="profile-wrapper">
-                <div class="profile-btn">👤 ${user}</div>
-                <div class="profile-dropdown">
+            <div class="profile-wrapper" id="profileWrap">
+                <div class="profile-btn" id="profileBtn">👤 ${user} ▾</div>
+                <div class="profile-dropdown" id="profileDrop">
                     ${links}
                 </div>
             </div>
         `;
+
+        // MOBILE: toggle dropdown on click
+        const wrap = document.getElementById("profileWrap");
+        const btn = document.getElementById("profileBtn");
+
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            wrap.classList.toggle("open");
+        });
+
+        // close if clicked outside
+        document.addEventListener("click", () => {
+            wrap.classList.remove("open");
+        });
     }
 
+    function goToUnprintedOrders() {
+    window.location.href = "farmer_unprinted_orders.html";
+}
+
     function scrollToServices() {
-        document.getElementById("services")
-            .scrollIntoView({ behavior: "smooth" });
+        document.getElementById("services").scrollIntoView({ behavior: "smooth" });
     }
 
     async function downloadOrdersExcel() {
-    const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
-    if (!token) {
-        alert("Please login again.");
-        return;
-    }
-
-    const response = await fetch("http://localhost:8083/admin/orders/export", {
-        method: "GET",
-        headers: {
-            Authorization: "Bearer " + token
+        if (!token) {
+            alert("Please login again.");
+            return;
         }
-    });
 
-    if (!response.ok) {
-        alert("You are not allowed or export failed!");
-        return;
+        const response = await fetch(`${BACKEND_URL}/admin/orders/export`, {
+            method: "GET",
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        });
+
+        if (!response.ok) {
+            alert("You are not allowed or export failed!");
+            return;
+        }
+
+        const blob = await response.blob();
+
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "orders.xlsx";
+        link.click();
     }
-
-    const blob = await response.blob();
-
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "orders.xlsx";
-    link.click();
-}
-
 
     async function loadHomeProducts() {
-        const res = await fetch("http://localhost:8083/get/all/products");
+        const res = await fetch(`${BACKEND_URL}/get/all/products`);
         const products = await res.json();
         const container = document.getElementById("homeProducts");
+
+        container.innerHTML = "";
 
         products.slice(0, 4).forEach(p => {
             container.innerHTML += `
                 <div class="product-card">
-                    <img src="${p.imageUrl}">
+                    <img src="${p.imageUrl}" alt="${p.name}">
                     <h3>${p.name}</h3>
                     <div class="price">₹${p.cost}</div>
                     <p>${p.description}</p>

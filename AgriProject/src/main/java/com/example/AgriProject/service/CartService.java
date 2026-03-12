@@ -1,6 +1,7 @@
 package com.example.AgriProject.service;
 
 import com.example.AgriProject.dto.CartDto;
+import com.example.AgriProject.dto.CartItemDto;
 import com.example.AgriProject.dto.CartMapper;
 import com.example.AgriProject.dto.UpdateCartDto;
 import com.example.AgriProject.entity.Cart;
@@ -44,7 +45,7 @@ public class CartService {
         if (cart == null) {
             cart = new Cart();
             cart.setUser(user);
-            cart.setTotalAmount(0);
+            cart.setTotalAmount(0.0);
             cart.setItems(new ArrayList<>());
             cart = cartRepository.save(cart);
         }
@@ -90,7 +91,18 @@ public class CartService {
 
         Cart cart= cartRepository.findByUser(user)
                 .orElseThrow(()->new RuntimeException("Cart is empty"));
-        return CartMapper.toCartDto(cart);
+
+        CartDto cartDto = CartMapper.toCartDto(cart);
+
+        for(CartItemDto itemDto : cartDto.getItems()){
+            Product freshProduct = productRepository
+                    .findById(itemDto.getProduct().getId())
+                    .orElseThrow(()->new RuntimeException("Product not found"));
+
+            itemDto.setStock(freshProduct.getStock());
+        }
+
+        return cartDto;
     }
 
     @Transactional
@@ -145,17 +157,6 @@ public class CartService {
 
         cart.setTotalAmount(total);
         cartRepository.save(cart);
-    }
-
-
-    public void updateCartTotals() {
-        List<Cart> carts=cartRepository.findAll();
-
-        for(Cart cart:carts){
-            double newTotal=cartItemRepository.sumSubtotalByCartId(cart.getId());
-            cart.setTotalAmount(newTotal);
-            cartRepository.save(cart);
-        }
     }
 
 }

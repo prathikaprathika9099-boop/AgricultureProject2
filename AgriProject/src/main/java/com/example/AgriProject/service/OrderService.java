@@ -32,7 +32,7 @@ public class OrderService {
 
     public List<OrderHistoryDto> getOrdersByUser(Long userId) {//for cash on delivery
 
-        return orderRepository.findByUserIdOrderByOrderDateDesc(userId)
+        return orderRepository.findOrdersWithItems(userId)
                 .stream()
                 .map(order -> {
                     OrderHistoryDto dto = new OrderHistoryDto();

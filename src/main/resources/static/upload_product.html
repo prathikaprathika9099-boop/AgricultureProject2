@@ -432,7 +432,7 @@
 
         const img = document.createElement("img");
         img.loading = "lazy";
-        img.src = BACKEND_URL + p.imageUrl;
+        img.src = p.imageUrl;
         img.alt = p.name || "Product";
         img.onerror = () => img.src = "default.png";
 
@@ -468,16 +468,21 @@
     }
 
     async function loadProducts() {
-      try {
-        const res = await fetch(`/get/product?userId=${userId}`);
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/get/product?userId=${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const products = await res.json();
         renderProducts(products);
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         emptyBox.style.display = "block";
         emptyBox.textContent = "⚠ Failed to load products";
-      }
     }
+}
 
     /* ✅ Upload product + instantly show it after upload */
     form.addEventListener("submit", async (e) => {

@@ -1,5 +1,7 @@
 package com.example.AgriProject.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.AgriProject.dto.ProductUpdateRequestDto;
 import com.example.AgriProject.dto.ProductUploadDto;
 import com.example.AgriProject.dto.ProductUploadResponseDto;
@@ -11,7 +13,6 @@ import com.example.AgriProject.repository.CartItemRepository;
 import com.example.AgriProject.repository.CartRepository;
 import com.example.AgriProject.repository.ProductRepository;
 import com.example.AgriProject.repository.UserRepository;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -41,29 +36,31 @@ public class ProductService {
 
     private final ModelMapper modelMapper;
 
+    @Autowired
+    private Cloudinary cloudinary;
+
     public ResponseEntity<ProductUploadResponseDto> uploadProduct(ProductUploadDto productUploadDto) throws Exception{
-        System.out.print(productUploadDto.getUserId());
-        String filename=System.currentTimeMillis()+"_"+productUploadDto.getImage().getOriginalFilename();
-        Path uploadPath= Paths.get("uploads");
+        Map uploadResult = cloudinary.uploader().upload(
+                productUploadDto.getImage().getBytes(),
+                ObjectUtils.asMap("folder","agribazar")
+        );
 
-        if(!Files.exists(uploadPath))
-            Files.createDirectories(uploadPath);
+        String imageUrl = uploadResult.get("secure_url").toString();
 
-        Path filePath=uploadPath.resolve(filename);
-        Files.copy(productUploadDto.getImage().getInputStream(),filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        User user=userRepository.findById(productUploadDto.getUserId()).orElseThrow(()->
+        User user = userRepository.findById(productUploadDto.getUserId()).orElseThrow(()->
                 new IllegalArgumentException("User not found"));
-        Product product=Product.builder()
-                        .name(productUploadDto.getName())
-                        .imageUrl("/uploads/"+filename)
-                        .stock(productUploadDto.getStock())
-                        .cost(productUploadDto.getCost())
-                        .description(productUploadDto.getDescription())
-                        .user(user)
-                        .reservedStock(0)
-                       .build();
-        Product saved=productRepository.save(product);
+
+        Product product = Product.builder()
+                .name(productUploadDto.getName())
+                .imageUrl(imageUrl)
+                .stock(productUploadDto.getStock())
+                .cost(productUploadDto.getCost())
+                .description(productUploadDto.getDescription())
+                .user(user)
+                .reservedStock(0)
+                .build();
+
+        Product saved = productRepository.save(product);
 
         ProductUploadResponseDto productUploadResponseDto=modelMapper.map(saved,ProductUploadResponseDto.class);
 

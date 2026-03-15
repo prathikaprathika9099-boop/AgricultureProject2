@@ -372,9 +372,6 @@
     © 2026 AgriBazaar | Grow Smart 🌿
 </footer>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     function goToSignup() {
@@ -481,7 +478,7 @@
             return;
         }
 
-        const response = await fetch(`${BACKEND_URL}/admin/orders/export`, {
+        const response = await fetch(`/admin/orders/export`, {
             method: "GET",
             headers: {
                 Authorization: "Bearer " + token
@@ -502,7 +499,7 @@
     }
 
     async function loadHomeProducts() {
-        const res = await fetch(`${BACKEND_URL}/get/all/products`);
+        const res = await fetch(`/get/all/products`);
         const products = await res.json();
         const container = document.getElementById("homeProducts");
 

@@ -343,9 +343,6 @@
 </div>
 
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     const userId = Number(localStorage.getItem("userId"));
@@ -364,7 +361,7 @@
 
     async function loadOrders() {
       try {
-        const res = await fetch(`${BACKEND_URL}/orders/user/${userId}`);
+        const res = await fetch(`/orders/user/${userId}`);
 
         if (!res.ok) {
           ordersContainer.innerHTML = `

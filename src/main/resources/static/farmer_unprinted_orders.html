@@ -153,9 +153,6 @@
     <div id="ordersContainer"></div>
 </div>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
 
@@ -164,7 +161,7 @@
         const token = localStorage.getItem("token");
 
         const response = await fetch(
-            `${BACKEND_URL}/farmer/unprinted-orders`,
+            `/farmer/unprinted-orders`,
             {
                 headers: {
                     Authorization: "Bearer " + token
@@ -238,7 +235,7 @@
         const token = localStorage.getItem("token");
 
         await fetch(
-            `${BACKEND_URL}/farmer/mark-packed/${orderId}` ,
+            `/farmer/mark-packed/${orderId}` ,
             {
                 method: "PUT",
                 headers: {

@@ -238,9 +238,6 @@
     </div>
 </div>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     const form = document.getElementById("signupForm");
@@ -296,14 +293,13 @@
       signupBtn.textContent = "Signing up...";
 
       try {
-        // Check if the user is the first to sign up (you would likely need to do this on the backend)
-        const responseCheck = await fetch(`${BACKEND_URL}/api/check-first-user`);
+        const responseCheck = await fetch(`/api/check-first-user`);
         const isFirstUser = await responseCheck.json();
 
         // Assign role based on whether the user is the first one
         payload.role = isFirstUser ? "FARMER" : "BUYER";
 
-        const response = await fetch(`${BACKEND_URL}/api/signup`, {
+        const response = await fetch(`/api/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

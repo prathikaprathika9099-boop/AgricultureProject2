@@ -485,9 +485,6 @@
     </div>
 </div>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     function openAddressModal() {
@@ -539,7 +536,7 @@
       };
 
       try {
-        const res = await fetch(`${BACKEND_URL}/address/add/${userId}`, {
+        const res = await fetch(`/address/add/${userId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(address)
@@ -575,7 +572,7 @@
       }
 
       try {
-        const res = await fetch(`${BACKEND_URL}/address/get/${userId}`);
+        const res = await fetch(`/address/get/${userId}`);
         const addresses = await res.json();
 
         addressList.innerHTML = "";

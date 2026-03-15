@@ -590,9 +590,6 @@
     </div>
 </div>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     const userId = Number(localStorage.getItem("userId"));
@@ -622,7 +619,7 @@
     };
 
     async function loadCart() {
-  const res = await fetch(`${BACKEND_URL}/cart/user/${userId}`);
+  const res = await fetch(`/cart/user/${userId}`);
   if (!res.ok) return showEmptyCart();
 
   const cart = await res.json();
@@ -717,7 +714,7 @@
     }
 
     async function updateQty(cartItemId, delta) {
-          await fetch(`${BACKEND_URL}/cart/item/update`, {
+          await fetch(`/cart/item/update`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cartItemId, delta })
@@ -727,7 +724,7 @@
 }
 
     async function deleteItem(cartItemId) {
-      await fetch(`${BACKEND_URL}/cart/item/delete/${cartItemId}`, {
+      await fetch(`/cart/item/delete/${cartItemId}`, {
         method: "DELETE"
       });
       loadCart();
@@ -739,7 +736,7 @@
     }
 
     async function loadAddresses() {
-      const res = await fetch(`${BACKEND_URL}/address/get/${userId}`);
+      const res = await fetch(`/address/get/${userId}`);
       if (!res.ok) return;
 
       const addresses = await res.json();
@@ -817,7 +814,7 @@
         pincode: pincode.value
       };
 
-      await fetch(`${BACKEND_URL}/address/add/${userId}`, {
+      await fetch(`/address/add/${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(address)
@@ -888,7 +885,7 @@
     shippingFee: selectedShipping
   };
 
-  const res = await fetch(`${BACKEND_URL}/orders/place/${userId}`, {
+  const res = await fetch(`/orders/place/${userId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)

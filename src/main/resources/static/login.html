@@ -289,10 +289,6 @@
 </div>
 
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
-
 <script>
     const form = document.getElementById("loginForm");
     const usernameInput = document.getElementById("username");
@@ -338,7 +334,7 @@
       loginBtn.textContent = "Logging in...";
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/login`, {
+        const response = await fetch(`/api/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"

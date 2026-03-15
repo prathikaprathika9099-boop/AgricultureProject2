@@ -376,9 +376,6 @@
     </div>
 </div>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     const userId = Number(localStorage.getItem("userId"));
@@ -472,7 +469,7 @@
 
     async function loadProducts() {
       try {
-        const res = await fetch(`${BACKEND_URL}/get/product?userId=${userId}`);
+        const res = await fetch(`/get/product?userId=${userId}`);
         const products = await res.json();
         renderProducts(products);
       } catch (err) {
@@ -513,7 +510,7 @@
       uploadBtn.textContent = "Uploading...";
 
       try {
-        const res = await fetch(`${BACKEND_URL}/upload/image`, {
+        const res = await fetch(`/upload/image`, {
           method: "POST",
           body: formData
         });

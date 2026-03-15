@@ -449,9 +449,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/fuse.js"></script>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     let allProducts = [];
@@ -461,7 +458,7 @@
       const grid = document.getElementById("productGrid");
 
       try {
-        const res = await fetch(`${BACKEND_URL}/get/all/products`);
+        const res = await fetch(`/get/all/products`);
         if (!res.ok) throw new Error("Failed to load products");
 
         const products = await res.json();
@@ -574,7 +571,7 @@
 
       try {
         const res = await fetch(
-          `${BACKEND_URL}/cart/add?userId=${userId}&productId=${id}&quantity=${quantity}`,
+          `/cart/add?userId=${userId}&productId=${id}&quantity=${quantity}`,
           { method: "POST" }
         );
 
@@ -604,7 +601,7 @@
       }
 
       try {
-        const res = await fetch(`${BACKEND_URL}/product/update/${id}`, {
+        const res = await fetch(`/product/update/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -631,7 +628,7 @@
     async function deleteProduct(id) {
       if (confirm("Are you sure you want to delete this product?")) {
         try {
-          const res = await fetch(`${BACKEND_URL}/product/delete/${id}`, {
+          const res = await fetch(`/product/delete/${id}`, {
             method: "DELETE"
           });
 

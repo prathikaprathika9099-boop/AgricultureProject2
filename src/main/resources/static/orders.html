@@ -101,13 +101,10 @@
 
 <div class="grid" id="ordersGrid"></div>
 
-<script th:inline="javascript">
-    const BACKEND_URL = /*[[${@appConfig.getBackendUrl()}]]*/ 'http://localhost:8083';
-</script>
 
 <script>
     async function loadUnprintedOrders() {
-        const res = await fetch(`${BACKEND_URL}/orders/unprinted`);
+        const res = await fetch(`/orders/unprinted`);
         const orders = await res.json();
 
         const grid = document.getElementById("ordersGrid");
@@ -142,7 +139,7 @@
             // After printing, mark the order as printed
             try {
                 const res = await fetch(
-                    `${BACKEND_URL}/orders/${orderId}/print`,
+                    `/orders/${orderId}/print`,
                     { method: "PUT" }
                 );
 

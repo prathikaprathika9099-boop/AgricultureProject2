@@ -37,17 +37,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
-                                "/**",
-                                "/*.html",
+                                "/index.html",
+                                "/error",
+                                "/login.html",
+                                "/signup.html",
+                                "/products.html",
+                                "/cart.html",
+                                "/orders.html",
+                                "/order_history.html",
+                                "/addresses.html",
+                                "/upload_product.html",
+                                "/farmer_unprinted_orders.html",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/uploads/**"
+                                "/uploads/**",
+                                "/*.png",
+                                "/*.ico"
                         ).permitAll()
 
                         .requestMatchers(

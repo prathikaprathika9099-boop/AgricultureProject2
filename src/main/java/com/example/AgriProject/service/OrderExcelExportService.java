@@ -4,7 +4,7 @@ import com.example.AgriProject.entity.Order;
 import com.example.AgriProject.entity.OrderItem;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -16,7 +16,7 @@ public class OrderExcelExportService {
 
     public byte[] exportOrdersToExcel(List<Order> orders) {
 
-        try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) { // streaming, avoids memory crash
+        try (Workbook workbook = new XSSFWorkbook()) {
 
             Sheet sheet = workbook.createSheet("Orders");
 
@@ -30,16 +30,8 @@ public class OrderExcelExportService {
             };
 
             Row header = sheet.createRow(0);
-
-            CellStyle headerStyle = workbook.createCellStyle();
-            Font font = workbook.createFont();
-            font.setBold(true);
-            headerStyle.setFont(font);
-
             for (int i = 0; i < cols.length; i++) {
-                Cell cell = header.createCell(i);
-                cell.setCellValue(cols[i]);
-                cell.setCellStyle(headerStyle);
+                header.createCell(i).setCellValue(cols[i]);
             }
 
             int rowNum = 1;
@@ -83,13 +75,13 @@ public class OrderExcelExportService {
             return out.toByteArray();
 
         } catch (Exception e) {
-            log.error("❌ EXPORT FAILED", e); // Railway logs
+            log.error("❌ EXPORT FAILED", e);
             throw new RuntimeException(e);
         }
     }
 
     // =========================
-    // WRITE ROW (SAFE VERSION)
+    // WRITE ROW (SAFE)
     // =========================
     private void writeRow(Row row, Order order, OrderItem item) {
 
@@ -145,7 +137,7 @@ public class OrderExcelExportService {
     }
 
     // =========================
-    // CELL SETTER (SAFE)
+    // CELL SETTER
     // =========================
     private void set(Row row, int col, Object value) {
 

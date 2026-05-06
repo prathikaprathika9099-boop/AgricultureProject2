@@ -4,7 +4,7 @@ import com.example.AgriProject.entity.Order;
 import com.example.AgriProject.entity.OrderItem;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -16,7 +16,10 @@ public class OrderExcelExportService {
 
     public byte[] exportOrdersToExcel(List<Order> orders) {
 
-        try (Workbook workbook = new XSSFWorkbook()) {
+        SXSSFWorkbook workbook = new SXSSFWorkbook(50); // keep only 50 rows in memory
+        workbook.setCompressTempFiles(true);
+
+        try {
 
             Sheet sheet = workbook.createSheet("Orders");
 
@@ -55,7 +58,7 @@ public class OrderExcelExportService {
                 }
             }
 
-            // ===== COLUMN WIDTHS =====
+            // ===== COLUMN WIDTHS (NO AUTOSIZE → avoids font dependency) =====
             int[] widths = {
                     5000, 7000, 4000,
                     5000, 7000,
@@ -77,6 +80,8 @@ public class OrderExcelExportService {
         } catch (Exception e) {
             log.error("❌ EXPORT FAILED", e);
             throw new RuntimeException(e);
+        } finally {
+            workbook.dispose(); // 🔥 VERY IMPORTANT (cleans temp files)
         }
     }
 
@@ -87,7 +92,6 @@ public class OrderExcelExportService {
 
         int col = 0;
 
-        // ===== ORDER DATA =====
         set(row, col++, order.getId());
         set(row, col++, safe(order.getOrderDate()));
         set(row, col++, safe(order.getStatus()));
@@ -106,7 +110,6 @@ public class OrderExcelExportService {
             col += 6;
         }
 
-        // ===== ITEM DATA =====
         if (item != null) {
 
             Double price = item.getPrice() != null ? item.getPrice() : 0.0;
@@ -123,32 +126,22 @@ public class OrderExcelExportService {
             col += 4;
         }
 
-        // ===== TOTALS =====
         set(row, col++, safe(order.getItemsTotal()));
         set(row, col++, safe(order.getShippingFee()));
         set(row, col++, safe(order.getTotalAmount()));
     }
 
     // =========================
-    // NULL SAFE VALUE
-    // =========================
     private Object safe(Object value) {
         return value != null ? value : "";
     }
 
-    // =========================
-    // CELL SETTER
-    // =========================
     private void set(Row row, int col, Object value) {
-
         Cell cell = row.createCell(col);
 
         if (value == null) {
             cell.setCellValue("");
-            return;
-        }
-
-        if (value instanceof Number) {
+        } else if (value instanceof Number) {
             cell.setCellValue(((Number) value).doubleValue());
         } else {
             cell.setCellValue(value.toString());

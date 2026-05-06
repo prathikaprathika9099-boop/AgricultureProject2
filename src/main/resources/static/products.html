@@ -474,8 +474,6 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/fuse.js"></script>
-
 
 <script>
     let allProducts = [];
@@ -687,21 +685,20 @@
     /* ================= SEARCH ================= */
 
     function searchProducts() {
-      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase().trim();
 
-      if (!searchTerm) {
-        displayProducts(allProducts);
-        return;
-      }
+  if (!searchTerm) {
+    displayProducts(allProducts);
+    return;
+  }
 
-      const fuse = new Fuse(allProducts, {
-        keys: ["name", "description"],
-        threshold: 0.3,
-      });
+  const result = allProducts.filter(p =>
+    (p.name && p.name.toLowerCase().includes(searchTerm)) ||
+    (p.description && p.description.toLowerCase().includes(searchTerm))
+  );
 
-      const result = fuse.search(searchTerm).map(r => r.item);
-      displayProducts(result);
-    }
+  displayProducts(result);
+}
 
     loadAllProducts();
 </script>

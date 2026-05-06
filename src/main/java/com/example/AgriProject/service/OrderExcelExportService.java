@@ -16,7 +16,7 @@ public class OrderExcelExportService {
 
     public byte[] exportOrdersToExcel(List<Order> orders) {
 
-        SXSSFWorkbook workbook = new SXSSFWorkbook(50); // keep only 50 rows in memory
+        Workbook workbook = new XSSFWorkbook(); // keep only 50 rows in memory
         workbook.setCompressTempFiles(true);
 
         try {

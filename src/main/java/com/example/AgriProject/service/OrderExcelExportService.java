@@ -4,7 +4,7 @@ import com.example.AgriProject.entity.Order;
 import com.example.AgriProject.entity.OrderItem;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -15,19 +15,12 @@ import java.util.List;
 public class OrderExcelExportService {
 
     public byte[] exportOrdersToExcel(List<Order> orders) {
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) { // streaming, avoids memory crash
 
             Sheet sheet = workbook.createSheet("Orders");
 
-            // Header Style
-            CellStyle headerStyle = workbook.createCellStyle();
-            Font font = workbook.createFont();
-            font.setBold(true);
-            headerStyle.setFont(font);
-
-            // Create Header
-            Row header = sheet.createRow(0);
-
+            // ===== HEADER =====
             String[] cols = {
                     "OrderId", "OrderDate", "Status",
                     "UserId", "UserName",
@@ -35,6 +28,13 @@ public class OrderExcelExportService {
                     "ProductName", "Quantity", "Price", "ItemTotal",
                     "ItemsTotal", "ShippingFee", "TotalAmount"
             };
+
+            Row header = sheet.createRow(0);
+
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
 
             for (int i = 0; i < cols.length; i++) {
                 Cell cell = header.createCell(i);
@@ -44,130 +44,111 @@ public class OrderExcelExportService {
 
             int rowNum = 1;
 
+            // ===== DATA =====
             for (Order order : orders) {
 
-                // Add a blank row BEFORE every new order (except first)
-                if (rowNum > 1) {
-                    rowNum++;
-                }
+                log.info("Processing Order ID: {}", order.getId());
 
-                if (order.getItems() == null || order.getItems().isEmpty()) {
+                List<OrderItem> items = order.getItems();
+
+                if (items == null || items.isEmpty()) {
                     Row row = sheet.createRow(rowNum++);
-                    writeOrderRowWithoutItems(row, order);
+                    writeRow(row, order, null);
                     continue;
                 }
 
-                for (OrderItem item : order.getItems()) {
+                for (OrderItem item : items) {
                     Row row = sheet.createRow(rowNum++);
-                    writeOrderItemRow(row, order, item);
+                    writeRow(row, order, item);
                 }
             }
 
+            // ===== COLUMN WIDTHS =====
+            int[] widths = {
+                    5000, 7000, 4000,
+                    5000, 7000,
+                    7000, 5000, 10000, 5000, 4000, 4000,
+                    7000, 3000, 5000, 5000,
+                    5000, 5000, 5000
+            };
 
-            
-int[] columnWidths = {
-    5000, // OrderId
-    7000, // OrderDate
-    4000, // Status
-    5000, // UserId
-    7000, // UserName
-    7000, // FullName
-    5000, // Phone
-    10000, // Street
-    5000, // City
-    4000, // State
-    4000, // Pincode
-    7000, // ProductName
-    3000, // Quantity
-    5000, // Price
-    5000, // ItemTotal
-    5000, // ItemsTotal
-    5000, // ShippingFee
-    5000  // TotalAmount
-};
+            for (int i = 0; i < widths.length; i++) {
+                sheet.setColumnWidth(i, widths[i]);
+            }
 
-for (int i = 0; i < columnWidths.length; i++) {
-    sheet.setColumnWidth(i, columnWidths[i]);
-}
-
-            // Convert to byte[]
+            // ===== OUTPUT =====
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
 
             return out.toByteArray();
 
         } catch (Exception e) {
-            log.error("Failed to export orders to Excel", e);
-            throw new RuntimeException("Excel export failed: " + e.getMessage());
+            log.error("❌ EXPORT FAILED", e); // Railway logs
+            throw new RuntimeException(e);
         }
     }
 
-    private void writeOrderRowWithoutItems(Row row, Order order) {
+    // =========================
+    // WRITE ROW (SAFE VERSION)
+    // =========================
+    private void writeRow(Row row, Order order, OrderItem item) {
+
         int col = 0;
 
+        // ===== ORDER DATA =====
         set(row, col++, order.getId());
-        set(row, col++, order.getOrderDate() != null ? order.getOrderDate().toString() : "");
-        set(row, col++, order.getStatus() != null ? order.getStatus().name() : "");
+        set(row, col++, safe(order.getOrderDate()));
+        set(row, col++, safe(order.getStatus()));
 
         set(row, col++, order.getUser() != null ? order.getUser().getId() : "");
         set(row, col++, order.getUser() != null ? order.getUser().getUsername() : "");
 
         if (order.getAddress() != null) {
-            set(row, col++, order.getAddress().getFullName());
-            set(row, col++, order.getAddress().getPhone());
-            set(row, col++, order.getAddress().getStreet());
-            set(row, col++, order.getAddress().getCity());
-            set(row, col++, order.getAddress().getState());
-            set(row, col++, order.getAddress().getPincode());
+            set(row, col++, safe(order.getAddress().getFullName()));
+            set(row, col++, safe(order.getAddress().getPhone()));
+            set(row, col++, safe(order.getAddress().getStreet()));
+            set(row, col++, safe(order.getAddress().getCity()));
+            set(row, col++, safe(order.getAddress().getState()));
+            set(row, col++, safe(order.getAddress().getPincode()));
         } else {
             col += 6;
         }
 
-        // Item columns empty
-        set(row, col++, "");
-        set(row, col++, "");
-        set(row, col++, "");
-        set(row, col++, "");
+        // ===== ITEM DATA =====
+        if (item != null) {
 
-        set(row, col++, order.getItemsTotal());
-        set(row, col++, order.getShippingFee());
-        set(row, col++, order.getTotalAmount());
-    }
+            Double price = item.getPrice() != null ? item.getPrice() : 0.0;
+            Integer qty = item.getQuantity() != null ? item.getQuantity() : 0;
 
-    private void writeOrderItemRow(Row row, Order order, OrderItem item) {
-        int col = 0;
+            set(row, col++, safe(item.getProductName()));
+            set(row, col++, qty);
+            set(row, col++, price);
 
-        set(row, col++, order.getId());
-        set(row, col++, order.getOrderDate() != null ? order.getOrderDate().toString() : "");
-        set(row, col++, order.getStatus() != null ? order.getStatus().name() : "");
+            double itemTotal = price * qty;
+            set(row, col++, itemTotal);
 
-        set(row, col++, order.getUser() != null ? order.getUser().getId() : "");
-        set(row, col++, order.getUser() != null ? order.getUser().getUsername() : "");
-
-        if (order.getAddress() != null) {
-            set(row, col++, order.getAddress().getFullName());
-            set(row, col++, order.getAddress().getPhone());
-            set(row, col++, order.getAddress().getStreet());
-            set(row, col++, order.getAddress().getCity());
-            set(row, col++, order.getAddress().getState());
-            set(row, col++, order.getAddress().getPincode());
         } else {
-            col += 6;
+            col += 4;
         }
 
-        set(row, col++, item.getProductName());
-        set(row, col++, item.getQuantity());
-        set(row, col++, item.getPrice());
-
-        double itemTotal = item.getPrice() * item.getQuantity();
-        set(row, col++, itemTotal);
-
-        set(row, col++, order.getItemsTotal());
-        set(row, col++, order.getShippingFee());
-        set(row, col++, order.getTotalAmount());
+        // ===== TOTALS =====
+        set(row, col++, safe(order.getItemsTotal()));
+        set(row, col++, safe(order.getShippingFee()));
+        set(row, col++, safe(order.getTotalAmount()));
     }
 
+    // =========================
+    // NULL SAFE VALUE
+    // =========================
+    private Object safe(Object value) {
+        return value != null ? value : "";
+    }
+
+    // =========================
+    // CELL SETTER (SAFE)
+    // =========================
     private void set(Row row, int col, Object value) {
+
         Cell cell = row.createCell(col);
 
         if (value == null) {

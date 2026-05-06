@@ -18,7 +18,7 @@ public class CorsConfig{
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:63342",
                 "http://localhost:8083",
-                "https://agricultureproject-production.up.railway.app"
+                "https://agricultureproject2-production.up.railway.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));

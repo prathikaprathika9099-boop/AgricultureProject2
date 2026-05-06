@@ -64,10 +64,31 @@ public class OrderExcelExportService {
             }
 
 
-            // Auto size
-            for (int i = 0; i < cols.length; i++) {
-                sheet.autoSizeColumn(i);
-            }
+            
+int[] columnWidths = {
+    5000, // OrderId
+    7000, // OrderDate
+    4000, // Status
+    5000, // UserId
+    7000, // UserName
+    7000, // FullName
+    5000, // Phone
+    10000, // Street
+    5000, // City
+    4000, // State
+    4000, // Pincode
+    7000, // ProductName
+    3000, // Quantity
+    5000, // Price
+    5000, // ItemTotal
+    5000, // ItemsTotal
+    5000, // ShippingFee
+    5000  // TotalAmount
+};
+
+for (int i = 0; i < columnWidths.length; i++) {
+    sheet.setColumnWidth(i, columnWidths[i]);
+}
 
             // Convert to byte[]
             ByteArrayOutputStream out = new ByteArrayOutputStream();

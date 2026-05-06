@@ -4,7 +4,7 @@ import com.example.AgriProject.entity.Order;
 import com.example.AgriProject.entity.OrderItem;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -16,10 +16,7 @@ public class OrderExcelExportService {
 
     public byte[] exportOrdersToExcel(List<Order> orders) {
 
-        SXSSFWorkbook workbook = new SXSSFWorkbook(50); // keep only 50 rows in memory
-        workbook.setCompressTempFiles(true);
-
-        try {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 
             Sheet sheet = workbook.createSheet("Orders");
 
@@ -58,7 +55,7 @@ public class OrderExcelExportService {
                 }
             }
 
-            // ===== COLUMN WIDTHS (NO AUTOSIZE → avoids font dependency) =====
+            // ===== COLUMN WIDTHS =====
             int[] widths = {
                     5000, 7000, 4000,
                     5000, 7000,
@@ -74,14 +71,11 @@ public class OrderExcelExportService {
             // ===== OUTPUT =====
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
-
             return out.toByteArray();
 
         } catch (Exception e) {
             log.error("❌ EXPORT FAILED", e);
             throw new RuntimeException(e);
-        } finally {
-            workbook.dispose(); // 🔥 VERY IMPORTANT (cleans temp files)
         }
     }
 

@@ -46,13 +46,15 @@ public class OrderExcelExportService {
                 if (items == null || items.isEmpty()) {
                     Row row = sheet.createRow(rowNum++);
                     writeRow(row, order, null);
-                    continue;
+                } else {
+                    for (OrderItem item : items) {
+                        Row row = sheet.createRow(rowNum++);
+                        writeRow(row, order, item);
+                    }
                 }
 
-                for (OrderItem item : items) {
-                    Row row = sheet.createRow(rowNum++);
-                    writeRow(row, order, item);
-                }
+                rowNum++; // blank row between each order
+
             }
 
             // ===== COLUMN WIDTHS =====
